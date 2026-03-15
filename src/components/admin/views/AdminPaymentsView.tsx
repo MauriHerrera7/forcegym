@@ -9,8 +9,10 @@ import { Loader2, CheckCircle, Search, CreditCard, User, Calendar, Trash2 } from
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useConfirm } from '@/providers/ConfirmDialogProvider';
 
 export default function AdminPaymentsView() {
+  const { confirm } = useConfirm();
   const { getPayments, approvePayment, deletePayment, loading: adminLoading } = useAdmin();
   const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,16 +36,22 @@ export default function AdminPaymentsView() {
   }, [fetchPayments]);
 
   const handleApprove = async (paymentId: string) => {
-    if (!confirm('¿Estás seguro de que quieres aprobar este pago manualmente?')) return;
-    setApproving(paymentId);
-    try {
-      await approvePayment(paymentId);
-      await fetchPayments();
-    } catch (err) {
-      console.error('Error approving payment:', err);
-    } finally {
-      setApproving(null);
-    }
+    confirm({
+      title: '¿Apobar pago manualmente?',
+      description: 'Esto activará la membresía del usuario.',
+      confirmText: 'Aprobar',
+      onConfirm: async () => {
+        setApproving(paymentId);
+        try {
+          await approvePayment(paymentId);
+          await fetchPayments();
+        } catch (err) {
+          console.error('Error approving payment:', err);
+        } finally {
+          setApproving(null);
+        }
+      }
+    });
   };
 
   const getStatusBadge = (status: string) => {

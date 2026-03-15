@@ -63,7 +63,7 @@ export function DashboardHeader({ user: propUser }: DashboardHeaderProps) {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between bg-[#0A0A0A] px-6 border-b border-[#404040]/30">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between bg-[#0A0A0A] px-6 border-b border-[#404040]/30 no-print print-hidden layout-header">
       <div className="flex items-center gap-4">
         <button 
           onClick={toggle}

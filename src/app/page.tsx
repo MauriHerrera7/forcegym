@@ -23,14 +23,14 @@ import ClientDashboard from './(dashboard)/client/page'
 import ClientLayout from './(dashboard)/client/layout'
 
 const LandingPage: React.FC = () => {
-  const { currentView } = useAppNavigation();
+  const { currentView, initialDashboardView } = useAppNavigation();
 
   if (currentView === 'register') return <RegisterPage />;
   if (currentView === 'login') return <LoginPage />;
   
   if (currentView === 'admin') {
     return (
-      <AdminLayout>
+      <AdminLayout initialView={initialDashboardView as any}>
         <AdminDashboard />
       </AdminLayout>
     );
@@ -38,7 +38,7 @@ const LandingPage: React.FC = () => {
 
   if (currentView === 'client') {
     return (
-      <ClientLayout>
+      <ClientLayout initialView={initialDashboardView as any}>
         <ClientDashboard />
       </ClientLayout>
     );

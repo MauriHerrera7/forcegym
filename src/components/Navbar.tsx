@@ -105,7 +105,7 @@ const Navbar: React.FC = () => {
             )}
 
             {/* Hamburger Button & Menu */}
-            <div className={cn("flex items-center", !isAuthenticated && "md:hidden")}>
+            <div className={cn("relative flex items-center", !isAuthenticated && "md:hidden")}>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={cn(

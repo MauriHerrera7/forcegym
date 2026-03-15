@@ -91,7 +91,7 @@ export function Sidebar({ role }: SidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col bg-[#2D0A0A] border-r border-[#450A0A]/30 transition-all duration-300 md:sticky md:top-0 md:shrink-0 overflow-hidden",
+          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col bg-[#2D0A0A] border-r border-[#450A0A]/30 transition-all duration-300 md:sticky md:top-0 md:shrink-0 overflow-hidden no-print print-hidden layout-sidebar",
           isOpen 
             ? "translate-x-0 w-64" 
             : "-translate-x-full w-0 md:translate-x-0 md:w-0 md:border-none"
@@ -142,16 +142,16 @@ export function Sidebar({ role }: SidebarProps) {
         </nav>
 
         {/* Footer / Logout */}
-        <div className="p-4 border-t border-[#450A0A]/30 min-w-64">
+        <div className="p-4 border-t border-[#450A0A]/30 min-w-64 bg-[#2D0A0A]">
           <button
             onClick={() => {
               logout();
               close();
             }}
-            className="flex items-center w-full gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 text-gray-400 hover:bg-red-500/10 hover:text-red-500"
+            className="flex items-center w-full gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 text-gray-400 hover:bg-[#ff0400]/10 hover:text-[#ff0400] group"
           >
-            <LogOut className="h-5 w-5" />
-            Cerrar Sesión
+            <LogOut className="h-5 w-5 text-gray-400 group-hover:text-[#ff0400] transition-colors" />
+            <span className="uppercase tracking-wider font-bold">Cerrar Sesión</span>
           </button>
         </div>
       </div>

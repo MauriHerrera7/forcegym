@@ -177,6 +177,21 @@
   html {
     scroll-behavior: smooth;
   }
+
+  /* Global Button Cursor Enforcement */
+  button, 
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    cursor: pointer;
+  }
+  
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
 }
 
 /* Custom Gym Animations */
@@ -281,5 +296,87 @@
   .halftone-bg {
     background-image: radial-gradient(#ffffff20 1px, transparent 0);
     background-size: 20px 20px;
+  }
+}
+
+/* Print Optimization Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 0 !important; /* Hides browser headers and footers (date, title, URL) */
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body, html {
+    background: white !important;
+    color: black !important;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Ocultar elementos específicos del layout */
+  .layout-sidebar, 
+  .layout-header,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Enforce single page fitting without cutting */
+  .routine-document-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 1cm 1cm 1cm !important; 
+    height: auto !important;
+    min-height: 297mm !important;
+    overflow: visible !important;
+    page-break-inside: auto; /* Allow content to flow across pages */
+    transform: none !important; /* Remove scale to keep it predictable */
+  }
+
+  /* Espacio de 1cm entre secciones al imprimir */
+  .routine-document-card > div {
+    margin-bottom: 1cm !important;
+  }
+  
+  .routine-document-card > div:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Force desktop-like behavior during print regardless of screen size */
+  .hidden.sm\:block {
+    display: block !important;
+  }
+
+  .flex.sm\:hidden,
+  .block.sm\:hidden {
+    display: none !important;
+  }
+
+  .sm\:col-span-2 {
+    grid-column: span 2 / span 2 !important;
+  }
+
+  /* Specific table grid overrides for print to match desktop */
+  .grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  }
+
+  .print-metadata-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+    width: 100% !important;
   }
 }

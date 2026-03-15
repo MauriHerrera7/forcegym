@@ -13,9 +13,10 @@ import { MUSCLE_GROUPS } from '@/lib/constants';
 
 interface MuscleSelectorProps {
   onMuscleClick: (muscleId: string) => void;
+  onHoverChange?: (muscleName: string | null) => void;
 }
 
-export function MuscleSelector({ onMuscleClick }: MuscleSelectorProps) {
+export function MuscleSelector({ onMuscleClick, onHoverChange }: MuscleSelectorProps) {
   const { user } = useAuthContext();
   const initialGender = (user?.gender?.toLowerCase() === 'female') ? 'female' : 'male';
   
@@ -49,8 +50,8 @@ export function MuscleSelector({ onMuscleClick }: MuscleSelectorProps) {
 
   const muscleMapping: Record<string, string> = {
     'pecho': 'pecho',
-    'abdominales': 'abdominales',
-    'oblicuos': 'abdominales',
+    'abdominales': 'abs',
+    'oblicuos': 'abs',
     'biceps': 'biceps',
     'triceps': 'triceps',
     'antebrazos': 'antebrazos',
@@ -66,19 +67,26 @@ export function MuscleSelector({ onMuscleClick }: MuscleSelectorProps) {
     'cuello': 'hombros',
   };
 
+  const getMuscleName = useCallback((slug: string) => {
+    const targetId = muscleMapping[slug] || slug;
+    const group = MUSCLE_GROUPS.find((g) => g.id === targetId);
+    return group ? group.name : slug;
+  }, [muscleMapping]);
+
+  // Notify parent of hover change
+  useEffect(() => {
+    if (onHoverChange) {
+      onHoverChange(hoveredMuscle ? getMuscleName(hoveredMuscle) : null);
+    }
+  }, [hoveredMuscle, onHoverChange, getMuscleName]);
+
   const handleMuscleClick = (muscle: BodyPart) => {
     const targetId = muscleMapping[muscle.slug] || muscle.slug;
     setSelectedMuscle(muscle.slug);
     onMuscleClick(targetId);
   };
 
-  const NON_INTERACTIVE = new Set(['cabeza', 'pelo', 'cuello', 'mano', 'pie', 'tibial', 'tibialis', 'tobillo', 'rodillas', 'antebrazos', 'abdominales', 'pantorrillas', 'calves', 'oblicuos']);
-
-  const getMuscleName = (slug: string) => {
-    const targetId = muscleMapping[slug] || slug;
-    const group = MUSCLE_GROUPS.find((g) => g.id === targetId);
-    return group ? group.name : slug;
-  };
+  const NON_INTERACTIVE = new Set(['cabeza', 'pelo', 'cuello', 'mano', 'pie', 'tibial', 'tibialis', 'tobillo', 'rodillas', 'antebrazos', 'pantorrillas', 'calves']);
 
   const renderPaths = (
     paths: string[],
@@ -124,63 +132,40 @@ export function MuscleSelector({ onMuscleClick }: MuscleSelectorProps) {
     ));
 
   return (
-    <>
-      <div className="flex flex-col items-center gap-6 w-full">
-        {/* El género se determina automáticamente por el perfil del usuario */}
-
-
-        {/* Side-by-side models */}
-        <div className="flex flex-col md:flex-row gap-6 w-full justify-center items-center md:items-stretch">
-          {/* Anterior */}
-          <div className="flex flex-col items-center gap-2 w-full max-w-[270px]">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-semibold">
-              Anterior
-            </span>
-            <div className="bg-[#111111]/60 rounded-2xl border border-[#2a2a2a] p-5 flex items-center justify-center w-full aspect-[270/540]">
-              <SvgWrapper side="front" gender={activeGender}>
-                {renderMuscles(anatomicalData.front)}
-              </SvgWrapper>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="hidden md:block w-px bg-[#2a2a2a] self-stretch my-8" />
-
-          {/* Posterior */}
-          <div className="flex flex-col items-center gap-2 w-full max-w-[270px]">
-            <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-400 font-semibold">
-              Posterior
-            </span>
-            <div className="bg-[#111111]/60 rounded-2xl border border-[#2a2a2a] p-5 flex items-center justify-center w-full aspect-[270/540]">
-              <SvgWrapper side="back" gender={activeGender}>
-                {renderMuscles(anatomicalData.back)}
-              </SvgWrapper>
-            </div>
+    <div className="flex flex-col items-center gap-4 w-full">
+      {/* Side-by-side models */}
+      <div className="flex flex-col md:flex-row gap-4 w-full justify-center items-center md:items-stretch">
+        {/* Anterior */}
+        <div className="flex flex-col items-center gap-2 w-full max-w-[320px]">
+          <span className="text-[9px] uppercase tracking-[0.4em] text-zinc-500 font-bold">
+            Anterior
+          </span>
+          <div className="bg-[#0D0D0D] rounded-3xl border border-white/5 p-4 flex items-center justify-center w-full aspect-[320/640]">
+            <SvgWrapper side="front" gender={activeGender}>
+              {renderMuscles(anatomicalData.front)}
+            </SvgWrapper>
           </div>
         </div>
 
-        {/* Selected muscle indicator */}
-        <div
-          className={cn(
-            'flex items-center gap-2.5 px-5 py-2 rounded-xl border bg-[#1a1a1a] transition-all duration-200',
-            selectedMuscle
-              ? 'opacity-100 border-[#ff0400]/40 shadow-[0_0_16px_rgba(255,4,0,0.1)]'
-              : 'opacity-0 pointer-events-none border-transparent'
-          )}
-        >
-          <div className="w-2 h-2 rounded-full bg-[#ff0400] shadow-[0_0_6px_#ff0400]" />
-          <p className="text-[9px] uppercase tracking-[0.25em] text-gray-500 font-medium">
-            Seleccionado:
-          </p>
-          <p className="text-white font-black uppercase tracking-[0.1em] text-sm">
-            {selectedMuscle ? getMuscleName(selectedMuscle) : ''}
-          </p>
-        </div>
+        {/* Divider */}
+        <div className="hidden md:block w-px bg-white/5 self-stretch my-2" />
 
-        <p className="text-zinc-400 text-[10px] uppercase tracking-[0.3em] font-medium mt-1">
-          Selecciona un grupo muscular
-        </p>
+        {/* Posterior */}
+        <div className="flex flex-col items-center gap-2 w-full max-w-[320px]">
+          <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold">
+            Posterior
+          </span>
+          <div className="bg-[#0D0D0D] rounded-3xl border border-white/5 p-4 flex items-center justify-center w-full aspect-[320/640]">
+            <SvgWrapper side="back" gender={activeGender}>
+              {renderMuscles(anatomicalData.back)}
+            </SvgWrapper>
+          </div>
+        </div>
       </div>
+
+      <p className="text-zinc-600 text-[10px] uppercase tracking-[0.4em] font-bold mt-2">
+        Explora la anatomía interactiva
+      </p>
 
       {/* Mouse-following tooltip — fixed to viewport, follows cursor */}
       {hoveredMuscle && (
@@ -192,9 +177,9 @@ export function MuscleSelector({ onMuscleClick }: MuscleSelectorProps) {
           }}
         >
           {/* Left arrow */}
-          <div className="absolute top-[14px] -left-[6px] w-3 h-3 rotate-45 bg-[#1a1a1a] border-l border-b border-[#ff0400]/50" />
+          <div className="absolute top-[14px] -left-[6px] w-3 h-3 rotate-45 bg-[#1a1a1a] border-l border-b border-apple-red/50" />
           {/* Box */}
-          <div className="bg-[#1a1a1a] border border-[#ff0400]/50 rounded-xl px-4 py-2.5 shadow-[0_0_24px_rgba(255,4,0,0.2)] min-w-[148px]">
+          <div className="bg-[#1a1a1a] border border-apple-red/50 rounded-xl px-4 py-2.5 shadow-[0_0_24px_rgba(255,4,0,0.2)] min-w-[148px]">
             <p className="text-[9px] uppercase tracking-[0.25em] text-gray-500 mb-0.5 font-medium">
               Grupo muscular
             </p>
@@ -204,6 +189,6 @@ export function MuscleSelector({ onMuscleClick }: MuscleSelectorProps) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

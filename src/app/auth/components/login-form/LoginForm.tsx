@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { useAppNavigation } from '@/providers/AppNavigationProvider';
 import { fetchApi } from '@/lib/api';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
   className?: string;
@@ -21,6 +22,7 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -57,7 +59,8 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
         navigateTo('client');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('Login error detail:', JSON.stringify(error, null, 2));
+      console.error('Login error message:', error.message);
 
       const detail = error?.data?.detail || error?.message || '';
       const detailLower = detail.toLowerCase();
@@ -153,22 +156,32 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
-              }}
-              className={`w-full bg-[#1c1c1e] text-white px-4 py-4 rounded-xl border transition-all duration-300 outline-none
-                ${errors.password 
-                  ? 'border-red-500/50 focus:border-red-500' 
-                  : 'border-zinc-800 focus:border-white'
-                }`}
-              placeholder="••••••••"
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                }}
+                className={`w-full bg-[#1c1c1e] text-white px-4 py-4 rounded-xl border transition-all duration-300 outline-none
+                  ${errors.password 
+                    ? 'border-red-500/50 focus:border-red-500' 
+                    : 'border-zinc-800 focus:border-white'
+                  }`}
+                placeholder="••••••••"
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-400 text-xs mt-2 ml-1 animate-in fade-in slide-in-from-top-1">
                 {errors.password}

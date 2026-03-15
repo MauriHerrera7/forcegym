@@ -1,9 +1,11 @@
 'use client'
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
 import Container from '@/components/Container'
 import { useAuthContext } from '@/providers/AuthProvider'
-import { useMembership } from '@/hooks/useMembership'
+import { useAppNavigation } from '@/providers/AppNavigationProvider'
+import { fetchApi } from '@/lib/api'
+import { useMembership, MembershipPlan } from '@/hooks/useMembership'
+import { Loader2 } from 'lucide-react'
 import PlanModal from '@/components/PlanModal'
 
 const plans = [
@@ -64,11 +66,56 @@ const plans = [
 
 const ApplePricing: React.FC = () => {
   const { user } = useAuthContext();
+  const { navigateTo } = useAppNavigation();
   const { activeMembership } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [backendPlans, setBackendPlans] = useState<MembershipPlan[]>([]);
+  const [purchasingId, setPurchasingId] = useState<string | null>(null);
 
-  const handlePlanClick = () => {
-    setIsModalOpen(true);
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const data = await fetchApi('/memberships/plans/');
+        const plansData = data?.results || data; 
+        if (Array.isArray(plansData)) {
+          setBackendPlans(plansData.filter((p: MembershipPlan) => p.is_active));
+        }
+      } catch (err) {
+        console.error('Error fetching plans for pricing:', err);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const handlePlanClick = async (planName: string) => {
+    if (!user) {
+      navigateTo('login');
+      return;
+    }
+
+    const targetPlan = backendPlans.find(p => p.name === planName);
+    if (!targetPlan) {
+      // Si no encontramos el plan por nombre exacto, abrimos el modal como fallback
+      setIsModalOpen(true);
+      return;
+    }
+
+    setPurchasingId(targetPlan.id);
+    try {
+      const response = await fetchApi('/payments/create_with_membership/', {
+        method: 'POST',
+        body: JSON.stringify({ plan_id: targetPlan.id }),
+      });
+      
+      if (response && response.init_point) {
+        window.location.href = response.init_point;
+      }
+    } catch (error: any) {
+      console.error('Error initiating purchase:', error);
+      alert(error.message || 'Error al procesar el pago. Por favor intenta de nuevo.');
+    } finally {
+      setPurchasingId(null);
+    }
   };
 
   return (
@@ -121,6 +168,7 @@ const ApplePricing: React.FC = () => {
 
              const colors = colorClasses[plan.color as keyof typeof colorClasses]
              const isActive = activeMembership?.plan?.name === plan.name;
+             const isPurchasing = backendPlans.find((p: MembershipPlan) => p.name === plan.name)?.id === purchasingId;
 
              return (
                <div 
@@ -172,15 +220,16 @@ const ApplePricing: React.FC = () => {
 
                   {/* CTA Button */}
                   <button 
-                    disabled={isActive || user?.role?.toUpperCase() === 'ADMIN'}
-                    onClick={handlePlanClick}
+                    disabled={isActive || user?.role?.toUpperCase() === 'ADMIN' || !!purchasingId}
+                    onClick={() => handlePlanClick(plan.name)}
                     className={`relative w-full py-5 rounded-2xl font-black text-base md:text-lg uppercase tracking-wider transition-all duration-500 overflow-hidden group/btn 
                       ${(isActive || user?.role?.toUpperCase() === 'ADMIN')
                         ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700' 
                          : 'bg-white text-black hover:text-white shadow-2xl active:scale-95'
-                      }`}
+                      } ${!!purchasingId ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    <span className="relative z-10">
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      {isPurchasing && <Loader2 className="h-5 w-5 animate-spin" />}
                       {isActive ? 'Ya obtenido' : user?.role?.toUpperCase() === 'ADMIN' ? 'Acceso Admin' : 'Comenzar ahora'}
                     </span>
                     {(!isActive && user?.role?.toUpperCase() !== 'ADMIN') && <div className="absolute inset-0 bg-[#ff0400] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />}

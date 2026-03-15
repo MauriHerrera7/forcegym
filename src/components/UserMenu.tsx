@@ -93,10 +93,10 @@ export default function UserMenu({ userImage: propImage, userName: propName }: U
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 focus:outline-none"
+        className="flex items-center space-x-2 focus:outline-none cursor-pointer"
       >
         <div 
-          className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-apple-red hover:border-apple-red/80 transition-colors duration-200 flex items-center justify-center"
+          className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-apple-red hover:border-apple-red/80 transition-colors duration-200 flex items-center justify-center cursor-pointer"
           style={{ backgroundColor: '#ff0800' }}
         >
           <span className="text-white text-xl font-bold select-none">{initials}</span>
@@ -104,7 +104,7 @@ export default function UserMenu({ userImage: propImage, userName: propName }: U
             <Image src={photo} alt={fullName} fill style={{ objectFit: 'cover' }} className="rounded-full" onError={() => setImgError(true)} />
           )}
         </div>
-        <span className="hidden md:block text-xs font-bold text-white uppercase tracking-tight">{fullName}</span>
+        <span className="hidden md:block text-xs font-bold text-white uppercase tracking-tight cursor-pointer">{fullName}</span>
       </button>
 
       {isOpen && (

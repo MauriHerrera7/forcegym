@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, RefreshCw, AlertCircle, CheckCircle, Calendar } from 'lucide-react';
 import { fetchApi } from '@/lib/api';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -66,6 +67,9 @@ export default function AdminRenewalsPage() {
 
   const filteredUsers = users
     .filter(user => {
+      // Excluir usuarios que nunca tuvieron membresía
+      if (!user.membership_info) return false;
+      
       const fullName = `${user.full_name || ''} ${user.first_name || ''} ${user.last_name || ''} ${user.username || ''}`;
       const matchesSearch = fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (user.email || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -85,25 +89,32 @@ export default function AdminRenewalsPage() {
   };
 
   const confirmRenewal = async () => {
-    if (selectedUser && selectedUser.membership_info) {
+    if (selectedUser) {
       setLoading(true);
       try {
-        // En un sistema real, esto crearía o activaría una membresía
-        // Por ahora simularemos la activación
-        await fetchApi(`/memberships/`, {
+        const today = new Date().toISOString().split('T')[0];
+        const nextMonth = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0];
+
+        // Usamos el endpoint estándar del router para crear membresías
+        // ID encontrado en la base de datos: 6ab4cc85-01c5-4cd3-8990-ae6831bcb088 (Mensual)
+        await fetchApi(`/memberships/user-memberships/`, {
           method: 'POST',
           body: JSON.stringify({
-            userId: selectedUser.id,
-            planId: '1', // Default Premium for simulation
-            months: 1
+            user: selectedUser.id,
+            plan: '6ab4cc85-01c5-4cd3-8990-ae6831bcb088',
+            start_date: today,
+            end_date: nextMonth,
+            status: 'ACTIVE',
+            notes: 'Renovación manual por administrador'
           })
         });
         
-        await fetchUsers(); // Refresh
+        await fetchUsers(); // Refrescar lista
         setIsRenewalModalOpen(false);
         setSelectedUser(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error renewing membership:', err);
+        toast.error('Error al renovar membresía: ' + (err.message || 'Error desconocido'));
       } finally {
         setLoading(false);
       }
@@ -136,7 +147,7 @@ export default function AdminRenewalsPage() {
             <div>
               <p className="text-sm text-gray-400">Próximos Vencimientos</p>
               <div className="text-3xl font-semibold text-yellow-400">
-                {users.filter(u => getMembershipStatus(u.membership_info?.end_date) === 'soon').length}
+                {users.filter(u => u.membership_info && getMembershipStatus(u.membership_info.end_date) === 'soon').length}
               </div>
             </div>
             <AlertCircle className="h-8 w-8 text-yellow-400 opacity-50" />
@@ -147,7 +158,7 @@ export default function AdminRenewalsPage() {
             <div>
               <p className="text-sm text-gray-400">Vencidas</p>
               <div className="text-3xl font-semibold text-red-400">
-                {users.filter(u => getMembershipStatus(u.membership_info?.end_date) === 'expired').length}
+                {users.filter(u => u.membership_info && getMembershipStatus(u.membership_info.end_date) === 'expired').length}
               </div>
             </div>
             <AlertCircle className="h-8 w-8 text-red-400 opacity-50" />
@@ -156,9 +167,9 @@ export default function AdminRenewalsPage() {
         <Card className="bg-[#191919] border-[#404040]">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Total Usuarios</p>
+              <p className="text-sm text-gray-400">A Renovar (Listado)</p>
               <div className="text-3xl font-semibold text-green-400">
-                {users.length}
+                {filteredUsers.length}
               </div>
             </div>
             <CheckCircle className="h-8 w-8 text-green-400 opacity-50" />
@@ -348,7 +359,7 @@ export default function AdminRenewalsPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h4 className="font-bold text-lg">
+                  <h4 className="font-bold text-lg text-white">
                     {selectedUser.full_name || (selectedUser.first_name || selectedUser.last_name ? 
                       `${selectedUser.first_name || ''} ${selectedUser.last_name || ''}`.trim() 
                       : selectedUser.username || 'Usuario')}

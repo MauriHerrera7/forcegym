@@ -6,13 +6,15 @@ import { Suspense } from 'react';
 
 export default function AdminLayout({
   children,
+  initialView = 'dashboard'
 }: {
   children: React.ReactNode;
+  initialView?: any;
 }) {
   return (
     <SidebarProvider>
       <Suspense>
-        <DashboardNavigationProvider>
+        <DashboardNavigationProvider initialView={initialView}>
           <div className="flex min-h-screen bg-[#0A0A0A] w-full overflow-hidden">
             <Sidebar role="admin" />
             <div className="flex flex-1 flex-col min-w-0">

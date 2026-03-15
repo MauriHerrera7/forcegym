@@ -15,7 +15,7 @@ export const MUSCLE_GROUPS = [
   { id: 'biceps', name: 'Bíceps', slug: 'biceps' },
   { id: 'triceps', name: 'Tríceps', slug: 'triceps' },
   { id: 'antebrazos', name: 'Antebrazos', slug: 'antebrazos' },
-  { id: 'abdominales', name: 'Abdominales', slug: 'abdominales' },
+  { id: 'abdominales', name: 'Abdominales', slug: 'abs' },
   { id: 'cuadriceps', name: 'Cuádriceps', slug: 'cuadriceps' },
   { id: 'isquiotibiales', name: 'Isquiotibiales', slug: 'isquiotibiales' },
   { id: 'pantorrillas', name: 'Pantorrillas', slug: 'pantorrillas' },

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { useAppNavigation } from '@/providers/AppNavigationProvider';
-import { Camera, Plus, User, Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Camera, Plus, User, Upload, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
 interface RegisterFormProps {
   className?: string;
@@ -66,6 +66,8 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -383,27 +385,45 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
 
           <div className="space-y-1.5 col-span-1">
             <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-200 ml-1">Contraseña</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              className={`w-full bg-black/40 text-white px-3 py-2.5 rounded-xl border text-sm transition-all duration-300 outline-none
-                ${errors.password ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                className={`w-full bg-black/40 text-white px-3 py-2.5 rounded-xl border text-sm transition-all duration-300 outline-none pr-10
+                  ${errors.password ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.password && <p className="text-red-400 text-[10px] ml-1">{errors.password}</p>}
           </div>
 
           <div className="space-y-1.5 col-span-1">
             <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-200 ml-1">Confirmar</label>
-            <input
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              className={`w-full bg-black/40 text-white px-3 py-2.5 rounded-xl border text-sm transition-all duration-300 outline-none
-                ${errors.confirmPassword ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                className={`w-full bg-black/40 text-white px-3 py-2.5 rounded-xl border text-sm transition-all duration-300 outline-none pr-10
+                  ${errors.confirmPassword ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.confirmPassword && <p className="text-red-400 text-[10px] ml-1">{errors.confirmPassword}</p>}
           </div>
         </div>

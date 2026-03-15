@@ -12,8 +12,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { useConfirm } from '@/providers/ConfirmDialogProvider';
 
 export default function AdminUsersPage() {
+  const { confirm } = useConfirm();
   const { getUsers, toggleUserStatus, deleteUser: deleteUserApi, loading } = useAdmin();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,15 +43,22 @@ export default function AdminUsersPage() {
   };
 
   const deleteUser = async (userId: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este usuario permanentemente?')) {
-      try {
-        await deleteUserApi(userId);
-        // Refresh list
-        fetchUsers();
-      } catch (err) {
-        alert('Error al eliminar el usuario: ' + (err as any).message);
+    confirm({
+      title: '¿Eliminar usuario permanentemente?',
+      description: 'Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          await deleteUserApi(userId);
+          // Refresh list
+          fetchUsers();
+          toast.success('Usuario eliminado');
+        } catch (err: any) {
+          toast.error('Error al eliminar el usuario: ' + (err.message || 'Error desconocido'));
+        }
       }
-    }
+    });
   };
 
   // Filter users

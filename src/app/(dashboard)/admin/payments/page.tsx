@@ -10,8 +10,11 @@ import { Loader2, CheckCircle, Search, CreditCard, User, Calendar, Trash2 } from
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { useConfirm } from '@/providers/ConfirmDialogProvider';
 
 export default function AdminPaymentsPage() {
+  const { confirm } = useConfirm();
   const { getPayments, approvePayment, deletePayment, loading: adminLoading } = useAdmin();
   const [payments, setPayments] = useState<AdminPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,33 +39,46 @@ export default function AdminPaymentsPage() {
   }, [fetchPayments]);
 
   const handleApprove = async (paymentId: string) => {
-    if (!confirm('¿Estás seguro de que quieres aprobar este pago manualmente? Esto activará la membresía.')) return;
-    
-    setApproving(paymentId);
-    try {
-      await approvePayment(paymentId);
-      await fetchPayments(); // Refresh list
-    } catch (err) {
-      console.error('Error approving payment:', err);
-      alert('Error al aprobar el pago');
-    } finally {
-      setApproving(null);
-    }
+    confirm({
+      title: '¿Aprobar pago manualmente?',
+      description: 'Esto activará la membresía del usuario.',
+      confirmText: 'Aprobar',
+      onConfirm: async () => {
+        setApproving(paymentId);
+        try {
+          await approvePayment(paymentId);
+          await fetchPayments(); // Refresh list
+          toast.success('Pago aprobado exitosamente');
+        } catch (err) {
+          console.error('Error approving payment:', err);
+          toast.error('Error al aprobar el pago');
+        } finally {
+          setApproving(null);
+        }
+      }
+    });
   };
 
   const handleDelete = async (paymentId: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este registro de pago? Esta acción no se puede deshacer.')) return;
-    
-    setDeleting(paymentId);
-    try {
-      await deletePayment(paymentId);
-      await fetchPayments(); // Refresh list
-    } catch (err) {
-      console.error('Error deleting payment:', err);
-      alert('Error al eliminar el pago');
-    } finally {
-      setDeleting(null);
-    }
+    confirm({
+      title: '¿Eliminar registro de pago?',
+      description: 'Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      variant: 'destructive',
+      onConfirm: async () => {
+        setDeleting(paymentId);
+        try {
+          await deletePayment(paymentId);
+          await fetchPayments(); // Refresh list
+          toast.success('Pago eliminado');
+        } catch (err) {
+          console.error('Error deleting payment:', err);
+          toast.error('Error al eliminar el pago');
+        } finally {
+          setDeleting(null);
+        }
+      }
+    });
   };
 
   const getStatusBadge = (status: string) => {

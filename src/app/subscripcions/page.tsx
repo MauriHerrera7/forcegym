@@ -6,6 +6,7 @@ import { Check, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SubscriptionsPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function SubscriptionsPage() {
       }
     } catch (err: any) {
       console.error("Error creating purchase:", err);
-      alert(err.message || "Error al procesar la suscripción.");
+      toast.error(err.message || "Error al procesar la suscripción.");
     } finally {
       setPurchasing(null);
     }

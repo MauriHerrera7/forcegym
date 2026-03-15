@@ -43,5 +43,28 @@ export function usePayments() {
     fetchPayments()
   }, [fetchPayments])
 
-  return { payments, loading, refreshPayments: fetchPayments }
+  const deletePayment = async (paymentId: string) => {
+    try {
+      await fetchApi(`/payments/${paymentId}/`, { method: 'DELETE' })
+      setPayments(prev => prev.filter(p => p.id !== paymentId))
+      return true
+    } catch (error) {
+      console.error('Error deleting payment:', error)
+      return false
+    }
+  }
+
+  const retryPayment = async (paymentId: string) => {
+    try {
+      const response = await fetchApi(`/payments/${paymentId}/initiate_mercadopago/`, {
+        method: 'POST'
+      })
+      return response
+    } catch (error) {
+      console.error('Error retrying payment:', error)
+      throw error
+    }
+  }
+
+  return { payments, loading, refreshPayments: fetchPayments, deletePayment, retryPayment }
 }

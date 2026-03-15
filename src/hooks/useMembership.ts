@@ -10,6 +10,7 @@ export interface MembershipPlan {
   duration_days: number;
   price: string;
   features: string[];
+  is_active: boolean;
 }
 
 export interface Membership {

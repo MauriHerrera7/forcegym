@@ -177,7 +177,7 @@ export default function AdminProfile() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-1"
+                      className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-1 cursor-pointer"
                     >
                       <Camera className="h-6 w-6 text-white" />
                       <span className="text-[10px] text-white font-black uppercase tracking-widest">Cambiar</span>

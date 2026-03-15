@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Edit, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useConfirm } from '@/providers/ConfirmDialogProvider';
 
 export default function AdminUsersView() {
+  const { confirm } = useConfirm();
   const { getUsers, toggleUserStatus, deleteUser: deleteUserApi, loading } = useAdmin();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,14 +39,20 @@ export default function AdminUsersView() {
   };
 
   const deleteUser = async (userId: string) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este usuario permanentemente?')) {
-      try {
-        await deleteUserApi(userId);
-        fetchUsers();
-      } catch (err) {
-        alert('Error al eliminar el usuario: ' + (err as any).message);
+    confirm({
+      title: '¿Eliminar usuario permanentemente?',
+      description: 'Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          await deleteUserApi(userId);
+          fetchUsers();
+        } catch (err) {
+          alert('Error al eliminar el usuario: ' + (err as any).message);
+        }
       }
-    }
+    });
   };
 
   const filteredUsers = (users || []).filter(user => {
