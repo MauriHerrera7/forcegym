@@ -146,6 +146,7 @@ export function Sidebar({ role }: SidebarProps) {
           <button
             onClick={() => {
               logout();
+              navigateTo('landing');
               close();
             }}
             className="flex items-center w-full gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 text-gray-400 hover:bg-[#ff0400]/10 hover:text-[#ff0400] group"

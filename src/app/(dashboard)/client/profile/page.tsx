@@ -24,6 +24,7 @@ export default function ClientProfile() {
     birthDate: '',
     weight: '',
     height: '',
+    goal_type: '' as 'LOSE' | 'GAIN' | '',
   });
   
   const [photo, setPhoto] = useState<string | undefined>(undefined);
@@ -48,6 +49,7 @@ export default function ClientProfile() {
         birthDate: user.birthdate || '',
         weight: user.weight?.toString() || '',
         height: user.height?.toString() || '',
+        goal_type: user.profile?.goal_type || '',
       });
       setPhoto(user.profile_picture_url || user.profile_picture || undefined);
     }
@@ -189,6 +191,9 @@ export default function ClientProfile() {
       formDataToSend.append('birthdate', formData.birthDate);
       if (formData.weight) formDataToSend.append('weight', formData.weight);
       if (formData.height) formDataToSend.append('height', formData.height);
+      if (formData.goal_type) {
+        formDataToSend.append('goal_type', formData.goal_type);
+      }
       
       if (photoFile) {
         formDataToSend.append('profile_picture', photoFile);
@@ -214,6 +219,7 @@ export default function ClientProfile() {
     formData.birthDate !== (user.birthdate || '') ||
     formData.weight !== (user.weight?.toString() || '') ||
     formData.height !== (user.height?.toString() || '') ||
+    formData.goal_type !== (user.profile?.goal_type || '') ||
     photoFile !== null
   ) : false;
 
@@ -437,6 +443,35 @@ export default function ClientProfile() {
                       }`}
                     />
                     {errors.height && <p className="text-xs text-red-500 mt-1">{errors.height}</p>}
+                  </div>
+
+                  {/* Goal Type Selection */}
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-gray-300">Objetivo Fitness</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, goal_type: 'LOSE' }))}
+                        className={`py-6 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                          formData.goal_type === 'LOSE'
+                            ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
+                            : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'
+                        }`}
+                      >
+                        Perder Grasa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, goal_type: 'GAIN' }))}
+                        className={`py-6 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                          formData.goal_type === 'GAIN'
+                            ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
+                            : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'
+                        }`}
+                      >
+                        Ganar Masa
+                      </button>
+                    </div>
                   </div>
                 </div>
 

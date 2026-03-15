@@ -9,6 +9,7 @@ interface UserProfile {
   bio?: string;
   date_of_birth?: string;
   fitness_goal?: string;
+  goal_type?: 'LOSE' | 'GAIN';
   medical_conditions?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
@@ -211,10 +212,13 @@ export function useAuth() {
     try {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
+      localStorage.removeItem("forcegym_app_view");
+      localStorage.removeItem("forcegym_dashboard_view");
       Cookies.remove("authenticated");
       Cookies.remove("auth_role");
+      Cookies.remove("forcegym_app_view");
+      Cookies.remove("forcegym_dashboard_view");
       setUser(null);
-      // router.push("/auth/login");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       throw error;

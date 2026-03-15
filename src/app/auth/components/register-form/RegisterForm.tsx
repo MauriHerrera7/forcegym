@@ -22,6 +22,7 @@ interface FormData {
   weight: string;
   height: string;
   gender: 'MALE' | 'FEMALE' | '';
+  goal_type: 'LOSE' | 'GAIN' | '';
 }
 
 interface FormErrors {
@@ -36,6 +37,7 @@ interface FormErrors {
   weight?: string;
   height?: string;
   gender?: string;
+  goal_type?: string;
   photo?: string;
   general?: string;
 }
@@ -57,6 +59,7 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
     weight: '',
     height: '',
     gender: '',
+    goal_type: '',
   });
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -124,6 +127,9 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
       case 'gender':
         if (!value) error = 'Selecciona tu género';
         break;
+      case 'goal_type':
+        if (!value) error = 'Selecciona tu objetivo';
+        break;
       default:
         break;
     }
@@ -141,6 +147,11 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
         isValid = false;
       }
     });
+
+    if (!formData.goal_type) {
+      setErrors(prev => ({ ...prev, goal_type: 'Selecciona tu objetivo' }));
+      isValid = false;
+    }
 
     return isValid;
   };
@@ -171,6 +182,7 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
       formDataToSend.append('gender', formData.gender);
       if (formData.weight) formDataToSend.append('weight', formData.weight);
       if (formData.height) formDataToSend.append('height', formData.height);
+      if (formData.goal_type) formDataToSend.append('goal_type', formData.goal_type);
       
       if (photoFile) {
         formDataToSend.append('profile_picture', photoFile);
@@ -342,6 +354,39 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
               </button>
             </div>
             {errors.gender && <p className="text-red-400 text-[10px] ml-1">{errors.gender}</p>}
+          </div>
+
+          <div className="space-y-1.5 col-span-2">
+            <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-200 ml-1">Objetivo Fitness *</label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => handleInputChange('goal_type', 'LOSE')}
+                className={`flex-1 py-3 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                  formData.goal_type === 'LOSE'
+                    ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-[0_0_16px_rgba(255,4,0,0.15)]'
+                    : errors.goal_type
+                      ? 'bg-black/40 border-red-500/50 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                      : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                }`}
+              >
+                 Perder grasa
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInputChange('goal_type', 'GAIN')}
+                className={`flex-1 py-3 rounded-xl border text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                  formData.goal_type === 'GAIN'
+                    ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-[0_0_16px_rgba(255,4,0,0.15)]'
+                    : errors.goal_type
+                      ? 'bg-black/40 border-red-500/50 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                      : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'
+                }`}
+              >
+                 Ganar masa
+              </button>
+            </div>
+            {errors.goal_type && <p className="text-red-400 text-[10px] ml-1">{errors.goal_type}</p>}
           </div>
 
           <div className="space-y-1.5 col-span-2">
