@@ -142,11 +142,19 @@ export default function ClientProfile() {
   const validateField = (name: string, value: string) => {
     let error = '';
     
-    if (['first_name', 'last_name', 'birthDate'].includes(name) && !value.trim()) {
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+    
+    if (['first_name', 'last_name'].includes(name)) {
+      if (!value.trim()) error = 'Este campo es requerido';
+      else if (!nameRegex.test(value)) error = 'Solo letras y espacios permitidos';
+    } else if (name === 'birthDate' && !value.trim()) {
       error = 'Este campo es requerido';
-    } else if (name === 'weight' || name === 'height') {
-      if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
-        error = 'Ingresa un valor válido';
+    } else if (name === 'height') {
+      if (value) {
+        const h = parseFloat(value);
+        if (isNaN(h) || !Number.isInteger(h) || h < 140 || h > 250) {
+          error = 'La altura debe ser un entero entre 140 y 250 cm';
+        }
       }
     }
 
@@ -189,7 +197,6 @@ export default function ClientProfile() {
       formDataToSend.append('last_name', formData.last_name);
       formDataToSend.append('dni', formData.dni);
       formDataToSend.append('birthdate', formData.birthDate);
-      if (formData.weight) formDataToSend.append('weight', formData.weight);
       if (formData.height) formDataToSend.append('height', formData.height);
       if (formData.goal_type) {
         formDataToSend.append('goal_type', formData.goal_type);
@@ -217,7 +224,6 @@ export default function ClientProfile() {
     formData.first_name !== (user.first_name || '') ||
     formData.last_name !== (user.last_name || '') ||
     formData.birthDate !== (user.birthdate || '') ||
-    formData.weight !== (user.weight?.toString() || '') ||
     formData.height !== (user.height?.toString() || '') ||
     formData.goal_type !== (user.profile?.goal_type || '') ||
     photoFile !== null
@@ -420,12 +426,10 @@ export default function ClientProfile() {
                       name="weight"
                       type="number"
                       value={formData.weight}
-                      onChange={handleInputChange}
-                      className={`bg-[#191919] border-[#404040] text-white focus:border-[#ff0400] transition-colors ${
-                        errors.weight ? 'border-red-500/50 focus:border-red-500' : ''
-                      }`}
+                      disabled
+                      className="bg-[#191919] border-[#404040] text-zinc-500 cursor-not-allowed opacity-70"
                     />
-                    {errors.weight && <p className="text-xs text-red-500 mt-1">{errors.weight}</p>}
+                    <p className="text-xs text-zinc-500 mt-1">El peso se actualiza desde el registro de progreso</p>
                   </div>
 
                   <div className="space-y-2">
@@ -452,7 +456,7 @@ export default function ClientProfile() {
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, goal_type: 'LOSE' }))}
-                        className={`py-6 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                        className={`py-3 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
                           formData.goal_type === 'LOSE'
                             ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
                             : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'
@@ -463,7 +467,7 @@ export default function ClientProfile() {
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, goal_type: 'GAIN' }))}
-                        className={`py-6 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                        className={`py-3 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
                           formData.goal_type === 'GAIN'
                             ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
                             : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'

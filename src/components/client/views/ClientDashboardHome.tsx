@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuthContext } from '@/providers/AuthProvider';
 
 export default function ClientDashboardHome() {
-  const { user } = useAuthContext();
+  const { user, fetchUser } = useAuthContext();
   const { data, loading, error, toggleAttendance, logWeight } = useClientDashboard();
   const [isAlertDismissed, setIsAlertDismissed] = React.useState(false);
 
@@ -142,7 +142,10 @@ export default function ClientDashboardHome() {
             data={data?.weight_progress || []} 
             goalType={data?.weight_goal_type || 'MAINTAIN'} 
             loading={loading}
-            onLogWeight={logWeight}
+            onLogWeight={async (weight, date) => {
+              await logWeight(weight, date);
+              await fetchUser();
+            }}
           />
           <UnifiedCalendar 
             attendance={data?.monthly_attendance || []} 

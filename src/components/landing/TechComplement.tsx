@@ -80,9 +80,9 @@ const TechComplement: React.FC = () => {
         </div>
 
         <div className="mt-40 text-center fade-up delay-500">
-           <p className="text-zinc-600 font-bold uppercase tracking-[0.4em] text-xs max-w-2xl mx-auto italic">
-             La tecnología en ForceGym es invisible, potente y diseñada para dejarte solo una preocupación: tu esfuerzo.
-           </p>
+            <p className="text-zinc-500 font-black uppercase tracking-[0.3em] text-sm sm:text-base max-w-3xl mx-auto italic leading-relaxed">
+              La tecnología en ForceGym es invisible, potente y diseñada para dejarte solo una preocupación: tu esfuerzo.
+            </p>
         </div>
       </Container>
     </section>

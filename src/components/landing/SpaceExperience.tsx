@@ -8,10 +8,10 @@ const SpaceExperience: React.FC = () => {
       <Container>
         {/* Section Header */}
         <div className="text-center mb-20 md:mb-32">
-          <span className="inline-block text-[#FF6B35] font-bold uppercase tracking-[0.3em] text-xs mb-4">
+          <span className="inline-block text-[#FF6B35] font-black uppercase tracking-[0.4em] text-sm mb-4">
             NUESTRAS INSTALACIONES
           </span>
-          <h2 className="text-white font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight">
+          <h2 className="text-white font-black text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tighter leading-none">
             Diseñado para tu{' '}
             <span className="text-red-600 bg-clip-text bg-gradient-to-r from-[#DC143C] to-[#FF6B35]">
               máximo rendimiento

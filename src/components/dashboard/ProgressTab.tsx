@@ -15,11 +15,27 @@ interface ProgressLog {
   reps: string;
 }
 
+function parseReps(value: string): { display: string; total: number | null } {
+  const nxmMatch = value.match(/^(\d+)[xX*](\d+)$/);
+  if (nxmMatch) {
+    const series = parseInt(nxmMatch[1]);
+    const reps = parseInt(nxmMatch[2]);
+    const total = series * reps;
+    return { display: `${series}x${reps} = ${total} reps`, total };
+  }
+  const num = parseInt(value);
+  if (!isNaN(num) && num > 0) {
+    return { display: `${num} reps`, total: num };
+  }
+  return { display: '', total: null };
+}
+
 export function ProgressTab({ date }: { date: Date }) {
   const [logs, setLogs] = useState<ProgressLog[]>([]);
   const [exercise, setExercise] = useState('');
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
+  const [repsPreview, setRepsPreview] = useState('');
   const [mounted, setMounted] = useState(false);
 
   // Load logs from localStorage
@@ -60,6 +76,7 @@ export function ProgressTab({ date }: { date: Date }) {
     setExercise('');
     setWeight('');
     setReps('');
+    setRepsPreview('');
   };
 
   const removeLog = (id: string) => {
@@ -95,11 +112,16 @@ export function ProgressTab({ date }: { date: Date }) {
                 <Label htmlFor="weight" className="text-gray-400 text-xs">Peso (kg)</Label>
                 <Input
                   id="weight"
-                  type="number"
-                  step="0.5"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="70"
                   value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '' || /^[0-9]*\.?[0-9]*$/.test(val)) {
+                      setWeight(val);
+                    }
+                  }}
                   className="bg-[#0A0A0A] border-[#404040] text-white focus:ring-[#ff0400] h-9"
                 />
               </div>
@@ -109,9 +131,20 @@ export function ProgressTab({ date }: { date: Date }) {
                   id="reps"
                   placeholder="3x12"
                   value={reps}
-                  onChange={(e) => setReps(e.target.value)}
+                  onChange={(e) => {
+                    setReps(e.target.value);
+                    setRepsPreview('');
+                  }}
+                  onBlur={() => {
+                    if (reps) {
+                      const parsed = parseReps(reps);
+                      setRepsPreview(parsed.display);
+                    }
+                  }}
                   className="bg-[#0A0A0A] border-[#404040] text-white focus:ring-[#ff0400] h-9"
                 />
+                {repsPreview && <p className="text-[10px] text-green-500 mt-0.5">{repsPreview}</p>}
+                <p className="text-[10px] text-zinc-500">Podés escribir NxM (ej: 3x10)</p>
               </div>
             </div>
             <Button type="submit" size="sm" className="w-full bg-[#ff0400] hover:bg-[#ff0400]/90 text-white font-bold tracking-wider">

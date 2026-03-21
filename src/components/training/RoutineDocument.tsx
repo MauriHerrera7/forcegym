@@ -58,7 +58,7 @@ export function RoutineDocument({ routine }: { routine: Routine }) {
       <tbody>
         <tr>
           <td>
-            <Card className="bg-white text-black p-3 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden print:shadow-none print:p-0 border-none sm:border-solid routine-document-card">
+            <Card className="bg-white text-black p-3 sm:p-8 md:p-12 shadow-2xl relative overflow-visible print:shadow-none print:p-0 border-none sm:border-solid routine-document-card">
               {/* Brand Header */}
               <div className="flex flex-col sm:flex-row justify-between items-start border-b-2 border-red-600 pb-3 sm:pb-8 mb-4 sm:mb-8 gap-4 print:pb-4">
                 <div className="w-full sm:w-auto">
@@ -112,7 +112,7 @@ export function RoutineDocument({ routine }: { routine: Routine }) {
                     </div>
 
                     <div className="overflow-x-auto custom-scrollbar">
-                      <div className="min-w-[600px]">
+                      <div className="w-full">
                         <div className="grid grid-cols-12 gap-1 sm:gap-2 text-[8px] sm:text-[10px] uppercase font-bold text-black border-b border-gray-100 pb-2 px-1 sm:px-2 bg-gray-50/50 py-2">
                             <div className="col-span-1">#</div>
                             <div className="col-span-11 sm:col-span-5">Ejercicio</div>
@@ -143,8 +143,8 @@ export function RoutineDocument({ routine }: { routine: Routine }) {
                             
                             {ex.notes && (
                               <div className="col-span-11 col-start-2 mt-2 flex gap-2 items-start">
-                                <Info className="h-3 w-3 text-gray-400 mt-0.5" />
-                                <p className="text-[10px] text-black italic">{ex.notes}</p>
+                                <Info className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
+                                <p className="text-xs text-black italic">{ex.notes}</p>
                               </div>
                             )}
                           </div>

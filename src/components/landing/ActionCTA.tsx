@@ -24,7 +24,7 @@ const ActionCTA: React.FC = () => {
       
       <Container className="relative z-10 text-center">
         <div className="max-w-5xl mx-auto space-y-16 fade-up">
-           <h2 className="text-white font-black text-4xl sm:text-6xl md:text-9xl lg:text-[12rem] italic uppercase tracking-tighter leading-[0.8] mb-12 drop-shadow-2xl">
+           <h2 className="text-white font-black text-6xl sm:text-8xl md:text-[12rem] lg:text-[15rem] italic uppercase tracking-tighter leading-[0.8] mb-12 drop-shadow-2xl">
              TU FUTURO <br /> <span className="text-apple-red">ES HOY.</span>
            </h2>
            

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useAuthContext } from '@/providers/AuthProvider';
 import {
   DropdownMenu,
@@ -14,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User as UserIcon, Menu } from 'lucide-react';
 import { NotificationPanel } from './NotificationPanel';
 import { useSidebar } from '@/providers/SidebarProvider';
-import { useDashboardNavigation } from '@/providers/DashboardNavigationProvider';
+import { getSafePhotoUrl } from '@/lib/utils';
 
 interface DashboardHeaderProps {
   user?: {
@@ -27,7 +28,6 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ user: propUser }: DashboardHeaderProps) {
   const { user: authUser, logout } = useAuthContext();
   const { toggle } = useSidebar();
-  const { setCurrentView } = useDashboardNavigation();
   const [imgError, setImgError] = React.useState(false);
 
   // Fallback map matching old or new user state
@@ -36,29 +36,7 @@ export function DashboardHeader({ user: propUser }: DashboardHeaderProps) {
   const fullName = `${firstName} ${lastName}`.trim() || 'Usuario';
   const email = authUser?.email || propUser?.email || '';
   
-  const getSafePhoto = () => {
-    const raw = (authUser?.profile_picture_url || authUser?.profile_picture || propUser?.photo);
-    if (!raw || typeof raw !== 'string' || raw.length < 5) return undefined;
-    
-    const lower = raw.toLowerCase().trim();
-    if (lower.includes('/null') || lower.includes('/undefined') || lower === 'null' || lower === 'undefined') return undefined;
-    
-    // Enforce https for all external URLs (Cloudinary, etc)
-    if (raw.startsWith('http')) {
-      return raw.trim().replace(/^http:\/\//i, 'https://');
-    }
-    
-    // If it's a relative path, prepend API URL
-    if (raw.startsWith('/')) {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-      return `${cleanBase}${raw}`;
-    }
-    
-    return undefined;
-  }
-  
-  const photo = getSafePhoto();
+  const photo = getSafePhotoUrl(authUser?.profile_picture_url || authUser?.profile_picture || propUser?.photo);
   
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
 
@@ -78,8 +56,11 @@ export function DashboardHeader({ user: propUser }: DashboardHeaderProps) {
         {/* Notifications */}
         <NotificationPanel />
 
-        {/* User Info (Non-interactive) */}
-        <div className="flex items-center gap-3 rounded-lg p-2">
+        {/* User Info - Clickable to Profile */}
+        <Link 
+          href={authUser?.role?.toLowerCase() === 'admin' ? '/admin/profile' : '/client/profile'}
+          className="flex items-center gap-3 rounded-lg p-2 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <Avatar className="h-10 w-10 ring-2 ring-[#404040]">
             {photo && !imgError ? (
               <AvatarImage 
@@ -98,7 +79,7 @@ export function DashboardHeader({ user: propUser }: DashboardHeaderProps) {
           <div className="hidden text-left md:block">
             <p className="text-sm font-medium text-white">{fullName}</p>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

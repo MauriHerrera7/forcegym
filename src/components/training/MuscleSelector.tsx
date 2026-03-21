@@ -137,7 +137,7 @@ export function MuscleSelector({ onMuscleClick, onHoverChange }: MuscleSelectorP
       <div className="flex flex-col md:flex-row gap-4 w-full justify-center items-center md:items-stretch">
         {/* Anterior */}
         <div className="flex flex-col items-center gap-2 w-full max-w-[320px]">
-          <span className="text-[9px] uppercase tracking-[0.4em] text-zinc-500 font-bold">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-zinc-400 font-black">
             Anterior
           </span>
           <div className="bg-[#0D0D0D] rounded-3xl border border-white/5 p-4 flex items-center justify-center w-full aspect-[320/640]">
@@ -152,7 +152,7 @@ export function MuscleSelector({ onMuscleClick, onHoverChange }: MuscleSelectorP
 
         {/* Posterior */}
         <div className="flex flex-col items-center gap-2 w-full max-w-[320px]">
-          <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-bold">
+          <span className="text-[11px] uppercase tracking-[0.4em] text-zinc-400 font-black">
             Posterior
           </span>
           <div className="bg-[#0D0D0D] rounded-3xl border border-white/5 p-4 flex items-center justify-center w-full aspect-[320/640]">
@@ -163,7 +163,7 @@ export function MuscleSelector({ onMuscleClick, onHoverChange }: MuscleSelectorP
         </div>
       </div>
 
-      <p className="text-zinc-600 text-[10px] uppercase tracking-[0.4em] font-bold mt-2">
+      <p className="text-zinc-500 text-[11px] uppercase tracking-[0.3em] font-black mt-2">
         Explora la anatomía interactiva
       </p>
 
@@ -180,7 +180,7 @@ export function MuscleSelector({ onMuscleClick, onHoverChange }: MuscleSelectorP
           <div className="absolute top-[14px] -left-[6px] w-3 h-3 rotate-45 bg-[#1a1a1a] border-l border-b border-apple-red/50" />
           {/* Box */}
           <div className="bg-[#1a1a1a] border border-apple-red/50 rounded-xl px-4 py-2.5 shadow-[0_0_24px_rgba(255,4,0,0.2)] min-w-[148px]">
-            <p className="text-[9px] uppercase tracking-[0.25em] text-gray-500 mb-0.5 font-medium">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-apple-red/70 mb-0.5 font-black">
               Grupo muscular
             </p>
             <p className="text-white font-black uppercase tracking-[0.1em] text-sm leading-tight">

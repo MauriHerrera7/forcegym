@@ -156,19 +156,17 @@ export function WeightProgressChart({ data, goalType, onLogWeight, loading }: We
     e.preventDefault();
     if (!newWeight || !onLogWeight) return;
     
-    // Prevent future dates
-    const selectedDate = new Date(newDate);
-    const today = new Date();
-    today.setHours(23, 59, 59, 999); // Allow anytime today
+    // Only allow today
+    const today = new Date().toISOString().split('T')[0];
     
-    if (selectedDate > today) {
-      alert("No puedes registrar un peso con fecha futura.");
+    if (newDate !== today) {
+      alert("Solo podés registrar el peso del día de hoy.");
       return;
     }
     
     setIsSubmitting(true);
     try {
-      await onLogWeight(parseFloat(newWeight), newDate);
+      await onLogWeight(parseFloat(newWeight), today);
       setIsModalOpen(false);
       setNewWeight('');
     } catch (error) {
@@ -209,14 +207,9 @@ export function WeightProgressChart({ data, goalType, onLogWeight, loading }: We
             <div className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="date" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Fecha</Label>
-                <Input 
-                  id="date"
-                  type="date"
-                  value={newDate}
-                  max={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setNewDate(e.target.value)}
-                  className="bg-[#0a0a0a] border-[#333] text-white focus:border-[#ff0400] h-12"
-                />
+                <div className="bg-[#0a0a0a] border border-[#333] text-white h-12 flex items-center px-4 rounded-md text-sm font-medium">
+                  {new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="weight" className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Peso (kg)</Label>
@@ -273,6 +266,19 @@ export function WeightProgressChart({ data, goalType, onLogWeight, loading }: We
         </div>
       </CardHeader>
       <CardContent className="h-[250px] w-full mt-2">
+        {data.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-3">
+            <p className="text-zinc-500 text-sm text-center">
+              No has registrado tu peso aún.{' '}
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="text-[#ff0400] font-bold hover:underline cursor-pointer bg-transparent border-none p-0 inline"
+              >
+                Registrar peso acá →
+              </button>
+            </p>
+          </div>
+        ) : (
         <ChartContainer config={chartConfig} className="h-full w-full">
           <AreaChart
             data={chartData}
@@ -329,6 +335,7 @@ export function WeightProgressChart({ data, goalType, onLogWeight, loading }: We
             />
           </AreaChart>
         </ChartContainer>
+        )}
       </CardContent>
       {renderModal()}
     </Card>

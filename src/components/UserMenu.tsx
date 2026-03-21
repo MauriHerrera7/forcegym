@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/providers/AuthProvider'
-import { useAppNavigation } from '@/providers/AppNavigationProvider'
-import { useDashboardNavigationSafe } from '@/providers/DashboardNavigationProvider'
 
 interface UserMenuProps {
   userImage?: string
@@ -13,9 +12,7 @@ interface UserMenuProps {
 
 export default function UserMenu({ userImage: propImage, userName: propName }: UserMenuProps) {
   const { user, logout } = useAuthContext()
-  const { navigateTo } = useAppNavigation()
-  // Safe: returns null when outside DashboardNavigationProvider (e.g. on Landing Navbar)
-  const dashboardNav = useDashboardNavigationSafe()
+  const router = useRouter()
 
   const [isOpen, setIsOpen] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -33,22 +30,20 @@ export default function UserMenu({ userImage: propImage, userName: propName }: U
 
   const handleDashboardClick = () => {
     const roleView = user?.role?.toUpperCase() === 'ADMIN' ? 'admin' : 'client'
-    navigateTo(roleView as any)
-    dashboardNav?.setCurrentView('dashboard')
+    router.push(`/${roleView}`)
     setIsOpen(false)
   }
 
   const handleProfileClick = () => {
     const roleView = user?.role?.toUpperCase() === 'ADMIN' ? 'admin' : 'client'
-    navigateTo(roleView as any)
-    dashboardNav?.setCurrentView('profile')
+    router.push(`/${roleView}/profile`)
     setIsOpen(false)
   }
 
   const handleLogout = async () => {
     try {
       await logout()
-      navigateTo('landing')
+      router.push('/')
     } catch (error) {
       console.error('Error al cerrar sesión:', error)
     }

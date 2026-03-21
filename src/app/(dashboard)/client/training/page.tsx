@@ -25,7 +25,7 @@ export default function TrainingPage() {
           Centro de <span className="text-apple-red">Entrenamiento</span>
         </h1>
         <div className="h-4 w-1 bg-apple-red/30 rounded-full" />
-        <p className="text-[9px] text-zinc-500 uppercase tracking-widest hidden md:block">Interactive anatomy</p>
+        <p className="text-[11px] text-zinc-400 uppercase tracking-[0.2em] hidden md:block font-bold">Interactive anatomy</p>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-4 items-start">
@@ -52,7 +52,7 @@ export default function TrainingPage() {
                   { step: '4', text: 'Accede a videos e instrucciones detalladas en alta definición.' }
                 ].map((item, idx) => (
                   <div key={idx} className="flex gap-4 group/step">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-apple-red/10 border border-apple-red/20 flex items-center justify-center text-[10px] font-bold text-apple-red group-hover/step:bg-apple-red group-hover/step:text-white transition-all">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-apple-red/10 border border-apple-red/20 flex items-center justify-center text-xs font-black text-apple-red group-hover/step:bg-apple-red group-hover/step:text-white transition-all">
                       {item.step}
                     </span>
                     <p className="text-sm text-zinc-400 group-hover/step:text-zinc-200 transition-colors leading-relaxed">
@@ -64,8 +64,8 @@ export default function TrainingPage() {
 
               {/* Pro Tip */}
               <div className="mt-8 p-4 rounded-xl bg-apple-red/5 border border-apple-red/10">
-                <p className="text-[10px] uppercase tracking-widest text-apple-red font-bold mb-1">PRO-TIP</p>
-                <p className="text-xs text-zinc-300 italic">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-apple-red font-black mb-1">PRO-TIP</p>
+                <p className="text-[13px] text-zinc-300 italic leading-relaxed">
                   "La técnica correcta previene lesiones y maximiza el reclutamiento de fibras musculares."
                 </p>
               </div>
@@ -92,7 +92,7 @@ export default function TrainingPage() {
                 selectedMuscleName ? "bg-apple-red shadow-apple-red/50" : "bg-zinc-700 shadow-transparent"
               )} />
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Explorando ahora</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-400 font-black mb-1">Explorando ahora</p>
                 <p className="text-xl font-black text-white uppercase italic tracking-tight">
                   {selectedMuscleName || 'Mueve el cursor sobre el modelo'}
                 </p>

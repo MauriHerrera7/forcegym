@@ -101,7 +101,7 @@ export function RoutineOverview({ routine, loading }: RoutineOverviewProps) {
                   Ver Rutina
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-[#121212] border-[#303030] text-white scrollbar-thin scrollbar-thumb-red-600 p-0 sm:p-6">
+              <DialogContent className="w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto bg-[#121212] border-[#303030] text-white scrollbar-thin scrollbar-thumb-red-600 p-0 sm:p-6">
                 <DialogHeader className="p-4 pr-12 sm:p-0 text-left sm:text-left">
                   <DialogTitle className="text-xl sm:text-2xl font-black italic uppercase tracking-tighter text-white border-b border-[#303030] pb-2 sm:pb-4 w-full">
                     Visualizar Rutina

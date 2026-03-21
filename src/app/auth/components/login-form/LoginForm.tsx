@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { useAppNavigation } from '@/providers/AppNavigationProvider';
 import { fetchApi } from '@/lib/api';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface LoginFormProps {
   className?: string;
@@ -18,6 +19,7 @@ interface FormErrors {
 export default function LoginForm({ className = '' }: LoginFormProps) {
   const { login } = useAuthContext();
   const { navigateTo } = useAppNavigation();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
@@ -97,6 +99,15 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
 
   return (
     <div className={`w-full max-w-sm mx-auto px-6 ${className}`}>
+      <button
+        type="button"
+        onClick={() => navigateTo('landing')}
+        className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-6 text-sm font-medium bg-transparent border-none p-0 cursor-pointer"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Volver a inicio
+      </button>
+
       <div className="mb-10 text-left">
         <h1 className="text-[40px] font-semibold tracking-tight text-white leading-tight mb-2">
           Bienvenido a <br />Force Gym.

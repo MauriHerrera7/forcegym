@@ -20,7 +20,6 @@ import {
   LogOut,
 } from "lucide-react";
 import { useSidebar } from "@/providers/SidebarProvider";
-import { useDashboardNavigation } from "@/providers/DashboardNavigationProvider";
 import { useAppNavigation } from "@/providers/AppNavigationProvider";
 import { useAuthContext } from "@/providers/AuthProvider";
 
@@ -29,26 +28,25 @@ interface SidebarProps {
 }
 
 const adminMenuItems = [
-  { view: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { view: "users", label: "Usuarios", icon: Users },
-  { view: "payments", label: "Pagos", icon: CreditCard },
-  { view: "renewals", label: "Renovaciones", icon: RefreshCw },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/users", label: "Usuarios", icon: Users },
+  { href: "/admin/payments", label: "Pagos", icon: CreditCard },
+  { href: "/admin/renewals", label: "Renovaciones", icon: RefreshCw },
 ] as const;
 
 const clientMenuItems = [
-  { view: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { view: "profile", label: "Perfil", icon: User },
-  { view: "training", label: "Entrenamiento", icon: Dumbbell },
-  { view: "routines", label: "Rutinas", icon: ClipboardList },
-  { view: "memberships", label: "Membresías", icon: CreditCard },
-  { view: "support", label: "Soporte", icon: HelpCircle },
+  { href: "/client", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/client/profile", label: "Perfil", icon: User },
+  { href: "/client/training", label: "Entrenamiento", icon: Dumbbell },
+  { href: "/client/routines", label: "Rutinas", icon: ClipboardList },
+  { href: "/client/memberships", label: "Membresías", icon: CreditCard },
+  { href: "/client/support", label: "Soporte", icon: HelpCircle },
 ] as const;
 
 export function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { isOpen, close } = useSidebar();
-  const { currentView, setCurrentView } = useDashboardNavigation();
   const { navigateTo } = useAppNavigation();
   const { logout } = useAuthContext();
   const menuItems = role === "admin" ? adminMenuItems : clientMenuItems;
@@ -59,18 +57,7 @@ export function Sidebar({ role }: SidebarProps) {
     setMounted(true);
   }, []);
 
-  const handleNavigate = (view: any) => {
-    setCurrentView(view);
-    
-    // If we are on a sub-route (like /client/routines/id), 
-    // we need to go back to the base route for the state-based nav to work
-    const basePath = role === 'admin' ? '/admin' : '/client';
-    if (pathname !== basePath) {
-      router.push(basePath);
-    }
-    
-    close();
-  };
+  // Navigation logic removed since we use native Links now
 
   const handleLogoClick = () => {
     navigateTo('landing');
@@ -121,12 +108,15 @@ export function Sidebar({ role }: SidebarProps) {
         <nav className="flex-1 space-y-1 p-4 overflow-y-auto min-w-64">
           {menuItems.map((item: any) => {
             const Icon = item.icon;
-            const isActive = currentView === item.view;
-
+            const isDashboard = item.href === '/admin' || item.href === '/client';
+            const isActive = isDashboard 
+              ? pathname === item.href 
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
-              <button
-                key={item.view}
-                onClick={() => handleNavigate(item.view)}
+              <Link
+                href={item.href}
+                key={item.href}
+                onClick={close}
                 className={cn(
                   "flex items-center w-full gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 text-left",
                   isActive
@@ -136,7 +126,7 @@ export function Sidebar({ role }: SidebarProps) {
               >
                 <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-gray-400 opacity-50")} />
                 {item.label}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -146,7 +136,7 @@ export function Sidebar({ role }: SidebarProps) {
           <button
             onClick={() => {
               logout();
-              navigateTo('landing');
+              router.push('/');
               close();
             }}
             className="flex items-center w-full gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 text-gray-400 hover:bg-[#ff0400]/10 hover:text-[#ff0400] group"

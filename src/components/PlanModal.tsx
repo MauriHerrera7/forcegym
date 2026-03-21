@@ -55,6 +55,16 @@ const planStyles = {
     glow: 'shadow-[0_20px_80px_rgba(245,158,11,0.15)]',
     cardGlow: 'group-hover:shadow-[0_20px_80px_rgba(245,158,11,0.3)]'
   }
+} as const
+
+const defaultPlanStyle = {
+  color: 'zinc',
+  emoji: '⚪',
+  gradient: 'from-[#71717A] to-[#A1A1AA]',
+  border: 'border-[#71717A]/30',
+  dot: 'bg-[#71717A]',
+  glow: 'shadow-[0_20px_80px_rgba(113,113,122,0.15)]',
+  cardGlow: 'group-hover:shadow-[0_20px_80px_rgba(113,113,122,0.3)]'
 }
 
 export default function PlanModal({ isOpen, onClose }: PlanModalProps) {
@@ -70,7 +80,7 @@ export default function PlanModal({ isOpen, onClose }: PlanModalProps) {
         setLoading(true)
         setError(null)
         try {
-          const data = await fetchApi('/memberships/plans/')
+          const data = await fetchApi('/memberships/plans/?page_size=100')
           console.log('[PlanModal] API Response:', data)
           
           // Solo mostrar los activos y ordenarlos por precio
@@ -161,7 +171,7 @@ export default function PlanModal({ isOpen, onClose }: PlanModalProps) {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {plans.map((plan) => {
-                const style = planStyles[plan.name as keyof typeof planStyles] || planStyles['Mensual']
+                const style = planStyles[plan.name as keyof typeof planStyles] || defaultPlanStyle
                 return (
                   <div 
                     key={plan.id}

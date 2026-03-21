@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/providers/AuthProvider'
 import { useAppNavigation, AppView } from '@/providers/AppNavigationProvider'
 import { Menu, X, LayoutDashboard, User, CreditCard, LogOut } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, getSafePhotoUrl } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthContext()
@@ -14,6 +16,7 @@ const Navbar: React.FC = () => {
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [imgError, setImgError] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -38,6 +41,7 @@ const Navbar: React.FC = () => {
 
   // Mobile-specific user initials
   const initials = user ? `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U' : '';
+  const photo = getSafePhotoUrl(user?.profile_picture_url || user?.profile_picture);
 
   const handleNav = (view: AppView) => {
     navigateTo(view);
@@ -54,7 +58,7 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      handleNav('landing');
+      router.push('/');
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -73,7 +77,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between" style={{ height: '85px' }}>
           {/* Logo (left) */}
           <div className="flex items-center">
-            <button onClick={() => handleNav('landing')} className="flex items-center outline-none">
+            <Link href="/" className="flex items-center outline-none">
               <Image
                 src="https://res.cloudinary.com/dry6dvzoj/image/upload/v1757729690/Forcegym_1_nxwdfw.png"
                 alt="Forcegym"
@@ -83,7 +87,7 @@ const Navbar: React.FC = () => {
                 className="transition-all duration-500 hover:brightness-110"
                 style={{ height: '125px', width: 'auto', filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))' }}
               />
-            </button>
+            </Link>
           </div>
 
             {/* Desktop Right End - Show Join buttons if not auth */}
@@ -127,9 +131,18 @@ const Navbar: React.FC = () => {
                     <div className="p-2 space-y-1">
                       {/* User Header */}
                       <div className="flex items-center gap-3 p-4 mb-2 bg-white/5 rounded-xl">
-                          <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center font-bold text-white shadow-lg shadow-red-600/20">
-                            {initials}
-                          </div>
+                          <Avatar className="w-10 h-10 ring-2 ring-red-500/20">
+                            {photo && !imgError ? (
+                              <AvatarImage 
+                                src={photo} 
+                                alt={user?.first_name || 'User'} 
+                                onError={() => setImgError(true)} 
+                              />
+                            ) : null}
+                            <AvatarFallback className="bg-red-600 text-white font-bold flex items-center justify-center">
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm font-bold text-white truncate">{user?.first_name} {user?.last_name}</span>
                             <span className="text-[10px] text-gray-400 truncate uppercase tracking-widest">{user?.role}</span>

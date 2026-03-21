@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { useAppNavigation } from '@/providers/AppNavigationProvider';
-import { Camera, Plus, User, Upload, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Camera, Plus, User, Upload, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface RegisterFormProps {
   className?: string;
@@ -90,13 +90,16 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
 
   const validateField = (field: keyof FormData, value: string) => {
     let error = '';
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
 
     switch (field) {
       case 'first_name':
         if (!value.trim()) error = 'El nombre es requerido';
+        else if (!nameRegex.test(value)) error = 'Solo letras y espacios permitidos';
         break;
       case 'last_name':
         if (!value.trim()) error = 'El apellido es requerido';
+        else if (!nameRegex.test(value)) error = 'Solo letras y espacios permitidos';
         break;
       case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -106,7 +109,19 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
       }
       case 'dni':
         if (!value.trim()) error = 'El DNI es requerido';
-        else if (!/^\d+$/.test(value)) error = 'Solo números permitidos';
+        else if (!/^\d{7,8}$/.test(value)) error = 'El DNI debe tener 7 u 8 dígitos numéricos';
+        break;
+      case 'weight':
+        if (value) {
+          const w = parseFloat(value);
+          if (isNaN(w) || w < 40 || w > 200) error = 'El peso debe estar entre 40 y 200 kg';
+        }
+        break;
+      case 'height':
+        if (value) {
+          const h = parseFloat(value);
+          if (isNaN(h) || !Number.isInteger(h) || h < 140 || h > 250) error = 'La altura debe ser un entero entre 140 y 250 cm';
+        }
         break;
       case 'password':
         if (!value) error = 'La contraseña es requerida';
@@ -226,6 +241,15 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
 
   return (
     <div className={`w-full max-w-lg mx-auto px-6 py-8 ${className}`}>
+      <button
+        type="button"
+        onClick={() => navigateTo('login')}
+        className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-4 text-sm font-medium bg-transparent border-none p-0 cursor-pointer"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Volver al login
+      </button>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Header */}
         <div className="text-center mb-6">
@@ -489,11 +513,14 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
             <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-200 ml-1 text-center block">Peso (kg)</label>
             <input
               type="number"
+              step="0.1"
               value={formData.weight}
               onChange={(e) => handleInputChange('weight', e.target.value)}
-              className="w-full bg-black/40 text-white px-2 py-2.5 rounded-xl border border-zinc-800 focus:border-white text-sm text-center transition-all duration-300 outline-none"
+              className={`w-full bg-black/40 text-white px-2 py-2.5 rounded-xl border text-sm text-center transition-all duration-300 outline-none
+                ${errors.weight ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`}
               placeholder="70"
             />
+            {errors.weight && <p className="text-red-400 text-[10px] ml-1 text-center">{errors.weight}</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -502,9 +529,11 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
               type="number"
               value={formData.height}
               onChange={(e) => handleInputChange('height', e.target.value)}
-              className="w-full bg-black/40 text-white px-2 py-2.5 rounded-xl border border-zinc-800 focus:border-white text-sm text-center transition-all duration-300 outline-none"
+              className={`w-full bg-black/40 text-white px-2 py-2.5 rounded-xl border text-sm text-center transition-all duration-300 outline-none
+                ${errors.height ? 'border-red-500/50' : 'border-zinc-800 focus:border-white'}`}
               placeholder="175"
             />
+            {errors.height && <p className="text-red-400 text-[10px] ml-1 text-center">{errors.height}</p>}
           </div>
         </div>
 
