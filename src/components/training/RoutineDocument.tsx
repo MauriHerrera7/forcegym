@@ -17,6 +17,7 @@ interface RoutineExercise {
   rest_seconds: number;
   notes: string;
   order: number;
+  day_of_week?: number | null;
 }
 
 interface Routine {
@@ -31,19 +32,47 @@ interface Routine {
 }
 
 export function RoutineDocument({ routine }: { routine: Routine }) {
-  // Group exercises by muscle group
+  // Group exercises by day and then by muscle
   const groupedExercises = React.useMemo(() => {
-    const groups: Record<string, RoutineExercise[]> = {};
+    const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const dayGroups: Record<string, RoutineExercise[]> = {};
+    
     routine.routine_exercises.forEach(ex => {
-      const groupName = ex.exercise.muscle_group_display || 'Otros';
-      if (!groups[groupName]) groups[groupName] = [];
-      groups[groupName].push(ex);
+      let dayName = 'Sin Día Asignado';
+      const dayIndex = ex.day_of_week;
+      if (typeof dayIndex === 'number' && dayIndex >= 0 && dayIndex <= 6) {
+        dayName = DAYS_OF_WEEK[dayIndex];
+      }
+
+      if (!dayGroups[dayName]) dayGroups[dayName] = [];
+      dayGroups[dayName].push(ex);
     });
-    // Sort exercises within each group by order
-    Object.keys(groups).forEach(key => {
-      groups[key].sort((a, b) => a.order - b.order);
+
+    // Create an array and sort it by day index
+    const sortedDays = Object.entries(dayGroups).sort(([aKey, aVals], [bKey, bVals]) => {
+       const aDay = aVals[0]?.day_of_week ?? 99;
+       const bDay = bVals[0]?.day_of_week ?? 99;
+       return aDay - bDay;
     });
-    return groups;
+
+    // Sub-group by Muscle Group within each day
+    return sortedDays.map(([dayName, dayExercises]) => {
+      const muscleGroups: Record<string, RoutineExercise[]> = {};
+      
+      dayExercises.forEach(ex => {
+        const muscleName = ex.exercise.muscle_group_display || 'Otros';
+        if (!muscleGroups[muscleName]) muscleGroups[muscleName] = [];
+        muscleGroups[muscleName].push(ex);
+      });
+
+      // Sort exercises within each muscle group by order
+      const sortedMuscleGroups = Object.entries(muscleGroups).map(([muscleName, exercises]) => {
+        exercises.sort((a, b) => a.order - b.order);
+        return [muscleName, exercises] as [string, RoutineExercise[]];
+      });
+
+      return [dayName, sortedMuscleGroups] as [string, [string, RoutineExercise[]][]];
+    });
   }, [routine.routine_exercises]);
 
   return (
@@ -102,55 +131,63 @@ export function RoutineDocument({ routine }: { routine: Routine }) {
                 </p>
               </div>
 
-              {/* Exercises Tables Grouped by Muscle */}
+              {/* Exercises Tables Grouped by Day and Muscle */}
               <div className="space-y-6 sm:space-y-10">
-                {Object.entries(groupedExercises).map(([groupName, exercises]) => (
-                  <div key={groupName} className="space-y-3">
-                    <div className="flex items-center gap-3 border-l-4 border-red-600 pl-3">
-                      <h2 className="text-base sm:text-lg font-semibold uppercase text-red-600 print:text-sm">{groupName}</h2>
-                      <span className="text-[9px] sm:text-[10px] font-bold bg-black text-white px-2 py-0.5 rounded tracking-widest print:text-[8px]">{exercises.length}</span>
+                {groupedExercises.map(([dayName, muscleGroups]) => (
+                  <div key={dayName} className="space-y-4 sm:space-y-6">
+                    <div className="flex items-center gap-3 border-l-4 border-black pl-3 bg-gray-50 py-2 w-full">
+                      <h2 className="text-lg sm:text-xl font-black uppercase text-black print:text-base">{dayName}</h2>
                     </div>
 
-                    <div className="overflow-x-auto custom-scrollbar">
-                      <div className="w-full">
-                        <div className="grid grid-cols-12 gap-1 sm:gap-2 text-[8px] sm:text-[10px] uppercase font-bold text-black border-b border-gray-100 pb-2 px-1 sm:px-2 bg-gray-50/50 py-2">
-                            <div className="col-span-1">#</div>
-                            <div className="col-span-11 sm:col-span-5">Ejercicio</div>
-                            <div className="hidden sm:block col-span-2 text-center">Series</div>
-                            <div className="hidden sm:block col-span-2 text-center">Reps/Tiempo</div>
-                            <div className="hidden sm:block col-span-2 text-center">Descanso</div>
+                    {muscleGroups.map(([muscleName, exercises]) => (
+                      <div key={muscleName} className="space-y-3 pl-2 sm:pl-4 border-l-2 border-red-600/20">
+                        <div className="flex items-center gap-3 pl-2">
+                          <h3 className="text-sm sm:text-base font-bold uppercase text-red-600 print:text-sm">{muscleName}</h3>
+                          <span className="text-[9px] sm:text-[10px] font-bold bg-gray-200 text-gray-800 px-2 py-0.5 rounded tracking-widest print:text-[8px]">{exercises.length}</span>
                         </div>
 
-                        {exercises.map((ex, i) => (
-                          <div key={ex.id} className="grid grid-cols-12 gap-1 sm:gap-2 py-2 sm:py-4 px-1 sm:px-2 border-b border-gray-50 hover:bg-gray-50/50 transition-colors items-center print:py-1">
-                            <div className="col-span-1 font-bold text-black text-base sm:text-lg">{i + 1}</div>
-                            <div className="col-span-11 sm:col-span-5">
-                              <p className="font-bold text-xs sm:text-sm leading-tight text-black print:text-xs">{ex.exercise.name}</p>
-                              {/* Mobile Details */}
-                              <div className="flex sm:hidden flex-wrap gap-x-3 gap-y-1 mt-1 text-[9px] font-bold text-gray-500 uppercase">
-                                <span className="text-red-600">{ex.sets} Ser</span>
-                                <span className="text-gray-300">•</span>
-                                <span className="text-blue-600">{ex.reps ? `${ex.reps} Rep` : ex.duration_seconds ? `${ex.duration_seconds}s` : '--'}</span>
-                                <span className="text-gray-300">•</span>
-                                <span>{ex.rest_seconds}s Desc</span>
-                              </div>
+                        <div className="overflow-x-auto custom-scrollbar">
+                          <div className="w-full">
+                            <div className="grid grid-cols-12 gap-1 sm:gap-2 text-[8px] sm:text-[10px] uppercase font-bold text-black border-b border-gray-100 pb-2 px-1 sm:px-2 bg-gray-50/50 py-2">
+                                <div className="col-span-1">#</div>
+                                <div className="col-span-11 sm:col-span-5">Ejercicio</div>
+                                <div className="hidden sm:block col-span-2 text-center">Series</div>
+                                <div className="hidden sm:block col-span-2 text-center">Reps/Tiempo</div>
+                                <div className="hidden sm:block col-span-2 text-center">Descanso</div>
                             </div>
-                            <div className="hidden sm:block col-span-2 text-center font-bold text-black">{ex.sets}</div>
-                            <div className="hidden sm:block col-span-2 text-center font-bold text-black text-sm">
-                               {ex.reps ? `${ex.reps}` : ex.duration_seconds ? `${ex.duration_seconds}s` : '--'}
-                            </div>
-                            <div className="hidden sm:block col-span-2 text-center font-bold text-black text-sm">{ex.rest_seconds}s</div>
-                            
-                            {ex.notes && (
-                              <div className="col-span-11 col-start-2 mt-2 flex gap-2 items-start">
-                                <Info className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
-                                <p className="text-xs text-black italic">{ex.notes}</p>
+
+                            {exercises.map((ex, i) => (
+                              <div key={ex.id} className="grid grid-cols-12 gap-1 sm:gap-2 py-2 sm:py-4 px-1 sm:px-2 border-b border-gray-50 hover:bg-gray-50/50 transition-colors items-center print:py-1">
+                                <div className="col-span-1 font-bold text-black text-base sm:text-lg">{i + 1}</div>
+                                <div className="col-span-11 sm:col-span-5">
+                                  <p className="font-bold text-xs sm:text-sm leading-tight text-black print:text-xs">{ex.exercise.name}</p>
+                                  {/* Mobile Details */}
+                                  <div className="flex sm:hidden flex-wrap gap-x-3 gap-y-1 mt-1 text-[9px] font-bold text-gray-500 uppercase">
+                                    <span className="text-red-600">{ex.sets} Ser</span>
+                                    <span className="text-gray-300">•</span>
+                                    <span className="text-blue-600">{ex.reps ? `${ex.reps} Rep` : ex.duration_seconds ? `${ex.duration_seconds}s` : '--'}</span>
+                                    <span className="text-gray-300">•</span>
+                                    <span>{ex.rest_seconds}s Desc</span>
+                                  </div>
+                                </div>
+                                <div className="hidden sm:block col-span-2 text-center font-bold text-black">{ex.sets}</div>
+                                <div className="hidden sm:block col-span-2 text-center font-bold text-black text-sm">
+                                   {ex.reps ? `${ex.reps}` : ex.duration_seconds ? `${ex.duration_seconds}s` : '--'}
+                                </div>
+                                <div className="hidden sm:block col-span-2 text-center font-bold text-black text-sm">{ex.rest_seconds}s</div>
+                                
+                                {ex.notes && (
+                                  <div className="col-span-11 col-start-2 mt-2 flex gap-2 items-start">
+                                    <Info className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
+                                    <p className="text-xs text-black italic">{ex.notes}</p>
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            ))}
                           </div>
-                        ))}
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 ))}
               </div>

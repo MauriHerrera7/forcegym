@@ -28,7 +28,10 @@ interface SelectedExercise {
   duration_seconds: number | null;
   rest_seconds: number;
   notes: string;
+  day_of_week: number;
 }
+
+const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export function RoutineCreationForm() {
   const router = useRouter();
@@ -42,14 +45,19 @@ export function RoutineCreationForm() {
   });
   const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [activeDay, setActiveDay] = useState(0);
 
   const handleClearSelection = () => {
     setSelectedExercises([]);
   };
 
   const handleExerciseSelect = (exercise: any) => {
-    if (selectedExercises.find(e => e.exercise_id === exercise.id)) {
-      setSelectedExercises(selectedExercises.filter(e => e.exercise_id !== exercise.id));
+    // Determine if the exercise is already added *for the current active day*
+    const existingIndex = selectedExercises.findIndex(e => e.exercise_id === exercise.id && e.day_of_week === activeDay);
+    
+    if (existingIndex >= 0) {
+      // Remove it from the current day
+      setSelectedExercises(selectedExercises.filter((_, idx) => idx !== existingIndex));
     } else {
       setSelectedExercises([
         ...selectedExercises,
@@ -57,12 +65,13 @@ export function RoutineCreationForm() {
           id: Math.random().toString(36).substr(2, 9),
           exercise_id: exercise.id,
           name: exercise.name,
-          order: selectedExercises.length,
+          order: selectedExercises.filter(e => e.day_of_week === activeDay).length,
           sets: 3,
           reps: 12,
           duration_seconds: null,
           rest_seconds: 60,
-          notes: ''
+          notes: '',
+          day_of_week: activeDay
         }
       ]);
     }
@@ -91,7 +100,13 @@ export function RoutineCreationForm() {
     }
 
     if (selectedExercises.length === 0) {
-      alert('Debes agregar al menos un ejercicio');
+      alert('Debes agregar al menos un ejercicio a la rutina');
+      return;
+    }
+
+    const uniqueDays = new Set(selectedExercises.map(e => e.day_of_week)).size;
+    if (uniqueDays < 3) {
+      alert('La rutina debe tener ejercicios asignados a por lo menos 3 días distintos.');
       return;
     }
 
@@ -108,7 +123,8 @@ export function RoutineCreationForm() {
           reps: e.reps,
           duration_seconds: e.duration_seconds,
           rest_seconds: e.rest_seconds,
-          notes: e.notes
+          notes: e.notes,
+          day_of_week: e.day_of_week
         }))
       };
 
@@ -177,7 +193,7 @@ export function RoutineCreationForm() {
                 onClick={() => setIsSelectorOpen(true)}
               >
                 <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
-                Seleccionar Ejercicios
+                Agregar Ejercicios al {DAYS_OF_WEEK[activeDay]}
               </Button>
             </div>
           </CardContent>
@@ -196,7 +212,7 @@ export function RoutineCreationForm() {
             <div className="p-6 pt-2">
               <ExerciseSelector 
                 onSelect={handleExerciseSelect}
-                selectedIds={selectedExercises.map(e => e.exercise_id)}
+                selectedIds={selectedExercises.filter(e => e.day_of_week === activeDay).map(e => e.exercise_id)}
               />
             </div>
 
@@ -205,17 +221,17 @@ export function RoutineCreationForm() {
                 type="button" 
                 variant="ghost" 
                 className="text-gray-500 hover:text-white hover:bg-white/5 gap-2"
-                onClick={handleClearSelection}
+                onClick={() => setSelectedExercises(selectedExercises.filter(e => e.day_of_week !== activeDay))}
               >
                 <X className="h-4 w-4" />
-                Limpiar Selección
+                Limpiar {DAYS_OF_WEEK[activeDay]}
               </Button>
               <Button 
                 type="button" 
                 className="bg-red-600 hover:bg-red-700 text-white px-8 font-bold"
                 onClick={() => setIsSelectorOpen(false)}
               >
-                Confirmar ({selectedExercises.length})
+                Confirmar ({selectedExercises.filter(e => e.day_of_week === activeDay).length})
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -242,7 +258,34 @@ export function RoutineCreationForm() {
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
-            {selectedExercises.map((exercise, index) => (
+            {/* Day Selector Tabs */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-[#303030] scrollbar-track-transparent">
+              {DAYS_OF_WEEK.map((day, idx) => (
+                <Button
+                  key={idx}
+                  type="button"
+                  variant={activeDay === idx ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setActiveDay(idx)}
+                  className={`flex-shrink-0 transition-colors ${
+                    activeDay === idx 
+                      ? 'bg-red-600 hover:bg-red-700 text-white border-red-600' 
+                      : 'bg-transparent border-[#303030] text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {day}
+                  {selectedExercises.filter(e => e.day_of_week === idx).length > 0 && (
+                    <span className={`ml-2 px-1.5 py-0.5 rounded-full text-[10px] ${
+                      activeDay === idx ? 'bg-white/20' : 'bg-[#303030] text-gray-300'
+                    }`}>
+                      {selectedExercises.filter(e => e.day_of_week === idx).length}
+                    </span>
+                  )}
+                </Button>
+              ))}
+            </div>
+
+            {selectedExercises.filter(e => e.day_of_week === activeDay).map((exercise, index) => (
               <div 
                 key={exercise.id}
                 className="p-4 bg-[#101010] border border-[#303030] rounded-xl space-y-4 group animate-in fade-in slide-in-from-right-4 duration-300"
@@ -315,10 +358,19 @@ export function RoutineCreationForm() {
               </div>
             ))}
 
-            {selectedExercises.length === 0 && (
+            {selectedExercises.filter(e => e.day_of_week === activeDay).length === 0 && (
               <div className="flex flex-col items-center justify-center h-full py-20 text-gray-600">
                 <Settings2 className="h-12 w-12 mb-4 opacity-20" />
-                <p>Selecciona ejercicios de la izquierda para comenzar</p>
+                <p>Selecciona ejercicios para el {DAYS_OF_WEEK[activeDay]}</p>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  className="mt-4 border-[#303030] text-gray-400 hover:text-white"
+                  onClick={() => setIsSelectorOpen(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar Ejercicios
+                </Button>
               </div>
             )}
           </CardContent>

@@ -47,9 +47,7 @@ export default function RoutineDetailPage() {
     return (
       <div className="text-center py-12">
         <p className="text-red-500 mb-4">{error || 'Rutina no encontrada'}</p>
-        <Link href="/client/routines">
-          <Button variant="outline">Volver a mis rutinas</Button>
-        </Link>
+        <Button variant="outline" onClick={() => router.back()}>Volver atrás</Button>
       </div>
     );
   }
@@ -58,12 +56,15 @@ export default function RoutineDetailPage() {
     <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto px-0 sm:px-4 md:px-0">
       <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4 no-print print-hidden border-b border-[#303030] pb-6">
         <div className="flex justify-start">
-          <Link href="/client/routines">
-            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white transition-colors px-0 no-print">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Volver
-            </Button>
-          </Link>
+          <Button 
+            onClick={() => router.back()}
+            variant="ghost" 
+            size="sm" 
+            className="text-gray-400 hover:text-white transition-colors px-0 no-print"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Volver
+          </Button>
         </div>
         
         <div className="text-center order-first md:order-none">

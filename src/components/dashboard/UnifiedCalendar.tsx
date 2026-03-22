@@ -154,7 +154,7 @@ export function UnifiedCalendar({ attendance, onToggleAttendance, loading }: Uni
                 className="rounded-md border-0 pointer-events-auto p-0"
                 classNames={{
                   months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                  month: "space-y-4 w-full",
+                  month: "space-y-4 w-full relative",
                   month_grid: "w-full border-collapse space-y-1",
                   weekdays: "flex w-full",
                   weekday: "text-zinc-500 rounded-md w-8 h-8 sm:w-9 sm:h-9 font-normal text-[0.8rem]",

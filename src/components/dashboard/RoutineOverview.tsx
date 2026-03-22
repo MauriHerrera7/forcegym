@@ -3,15 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dumbbell, Calendar, CheckCircle2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
-import { RoutineDocument } from '@/components/training/RoutineDocument';
-import { fetchApi } from '@/lib/api';
+import Link from 'next/link';
 
 interface RoutineOverviewProps {
   routine: {
@@ -24,22 +16,6 @@ interface RoutineOverviewProps {
 }
 
 export function RoutineOverview({ routine, loading }: RoutineOverviewProps) {
-  const [selectedRoutine, setSelectedRoutine] = useState<any>(null);
-  const [modalLoading, setModalLoading] = useState(false);
-
-  const handleOpenPreview = async () => {
-    if (!routine?.id) return;
-    
-    setModalLoading(true);
-    try {
-      const response = await fetchApi(`/training/routines/${routine.id}/`);
-      setSelectedRoutine(response);
-    } catch (err) {
-      console.error('Error fetching routine details:', err);
-    } finally {
-      setModalLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -91,39 +67,14 @@ export function RoutineOverview({ routine, loading }: RoutineOverviewProps) {
                </div>
             </div>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button 
-                  onClick={handleOpenPreview}
-                  className="bg-red-600 hover:bg-red-700 text-white gap-2 transition-all shadow-lg shadow-red-600/20 px-6 font-medium italic uppercase tracking-tighter"
-                >
-                  <Eye className="h-4 w-4" />
-                  Ver Rutina
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto bg-[#121212] border-[#303030] text-white scrollbar-thin scrollbar-thumb-red-600 p-0 sm:p-6">
-                <DialogHeader className="p-4 pr-12 sm:p-0 text-left sm:text-left">
-                  <DialogTitle className="text-xl sm:text-2xl font-black italic uppercase tracking-tighter text-white border-b border-[#303030] pb-2 sm:pb-4 w-full">
-                    Visualizar Rutina
-                  </DialogTitle>
-                </DialogHeader>
-                
-                {modalLoading ? (
-                  <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
-                    <p className="text-gray-400 animate-pulse uppercase tracking-widest font-bold text-xs italic">Cargando detalles...</p>
-                  </div>
-                ) : selectedRoutine ? (
-                  <div className="mt-6">
-                    <RoutineDocument routine={selectedRoutine} />
-                  </div>
-                ) : (
-                  <div className="text-center py-10 text-red-500 font-bold">
-                    Error al cargar los datos de la rutina.
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+            <Link href={`/client/routines/${routine.id}`}>
+              <Button 
+                className="bg-red-600 hover:bg-red-700 text-white gap-2 transition-all shadow-lg shadow-red-600/20 px-6 font-medium italic uppercase tracking-tighter"
+              >
+                <Eye className="h-4 w-4" />
+                Ver Rutina
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

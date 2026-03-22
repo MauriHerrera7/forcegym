@@ -18,20 +18,20 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-3 relative", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
+        month: "space-y-4 relative",
         month_caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
+        nav: "flex items-center justify-between absolute inset-x-0 top-1 px-2 pointer-events-none z-20",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border-[#404040] hover:bg-[#404040] absolute left-1"
+          "h-8 w-8 bg-[#222] p-0 border-[#444] hover:bg-red-600 hover:border-red-600 text-white pointer-events-auto transition-colors"
         ),
         button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 border-[#404040] hover:bg-[#404040] absolute right-1"
+          "h-8 w-8 bg-[#222] p-0 border-[#444] hover:bg-red-600 hover:border-red-600 text-white pointer-events-auto transition-colors"
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
@@ -55,8 +55,8 @@ function Calendar({
       }}
       components={{
         Chevron: ({ orientation }) => orientation === 'left' 
-          ? <ChevronLeft className="h-4 w-4" /> 
-          : <ChevronRight className="h-4 w-4" />,
+          ? <ChevronLeft className="h-5 w-5 text-white" /> 
+          : <ChevronRight className="h-5 w-5 text-white" />,
       }}
       {...props}
     />
