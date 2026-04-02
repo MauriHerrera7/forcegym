@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { useAppNavigation } from '@/providers/AppNavigationProvider';
+import { useRouter } from 'next/navigation';
 import { Camera, Plus, User, Upload, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 interface RegisterFormProps {
@@ -45,6 +46,7 @@ interface FormErrors {
 export default function RegisterForm({ className = '' }: RegisterFormProps) {
   const { register, login } = useAuthContext();
   const { navigateTo } = useAppNavigation();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<FormData>({
@@ -209,7 +211,15 @@ export default function RegisterForm({ className = '' }: RegisterFormProps) {
       try {
         setIsLoggingIn(true);
         await login({ email: formData.email, password: formData.password });
-        navigateTo('client');
+        
+        // Handle redirect if exists
+        const redirectTarget = localStorage.getItem('forcegym_auth_redirect');
+        if (redirectTarget) {
+          localStorage.removeItem('forcegym_auth_redirect');
+          router.push(redirectTarget);
+        } else {
+          navigateTo('client');
+        }
       } catch (loginErr: any) {
         console.error('Auto-login error:', loginErr);
         setIsLoggingIn(false);

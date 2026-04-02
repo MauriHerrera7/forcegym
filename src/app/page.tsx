@@ -11,6 +11,7 @@ import ApplePricing from '@/components/landing/ApplePricing'
 import AppleTestimonials from '@/components/landing/Testimonials'
 import ActionCTA from '@/components/landing/ActionCTA'
 import AppleFooter from '@/components/landing/AppleFooter'
+import TrainingTech from '@/components/landing/TrainingTech'
 
 // Auth Pages (Components)
 import RegisterPage from './auth/register/page'
@@ -48,6 +49,7 @@ const LandingPage: React.FC = () => {
     <main className="bg-apple-black text-white selection:bg-apple-red selection:text-white flex flex-col min-h-screen">
       <AppleHero />
       <SpaceExperience />
+      <TrainingTech />
       <TechComplement />
       <ApplePricing />
       <AppleTestimonials />

@@ -53,8 +53,15 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
     try {
       await login({ email, password });
       
-      // Fetch user role to navigate correctly since automatic redirect is disabled
       const userRes = await fetchApi("/users/me/");
+      const redirectTarget = localStorage.getItem('forcegym_auth_redirect');
+      
+      if (redirectTarget) {
+        localStorage.removeItem('forcegym_auth_redirect');
+        router.push(redirectTarget);
+        return;
+      }
+
       if (userRes?.role?.toUpperCase() === 'ADMIN') {
         navigateTo('admin');
       } else {
