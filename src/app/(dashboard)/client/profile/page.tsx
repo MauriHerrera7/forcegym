@@ -12,6 +12,7 @@ import { Pencil, Save, X, Camera, Plus, Loader2, CheckCircle2, AlertCircle, QrCo
 import QRCode from 'qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuthContext } from '@/providers/AuthProvider';
+import { cn } from '@/lib/utils';
 
 export default function ClientProfile() {
   const { user, loading, updateProfile } = useAuthContext();
@@ -24,7 +25,7 @@ export default function ClientProfile() {
     birthDate: '',
     weight: '',
     height: '',
-    goal_type: '' as 'LOSE' | 'GAIN' | '',
+    goal_type: '' as 'LOSE' | 'GAIN' | 'MAINTAIN' | '',
   });
   
   const [photo, setPhoto] = useState<string | undefined>(undefined);
@@ -213,8 +214,26 @@ export default function ClientProfile() {
       // Clear notification after 5 seconds
       setTimeout(() => setNotification(null), 5000);
     } catch (error: any) {
-      console.error('Error updating profile:', error);
-      setNotification({ type: 'error', message: error.message || 'Error al actualizar el perfil.' });
+      console.error('Error updating profile:', error.data || error.message || error);
+      
+      // Intentar extraer mensajes de error detallados del backend
+      let errorMessage = 'Error al actualizar el perfil.';
+      
+      if (error.data && typeof error.data === 'object') {
+        const details = [];
+        for (const [key, value] of Object.entries(error.data)) {
+          const fieldName = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+          const message = Array.isArray(value) ? value[0] : value;
+          details.push(`${fieldName}: ${message}`);
+        }
+        if (details.length > 0) {
+          errorMessage = `Error: ${details.join(' | ')}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setNotification({ type: 'error', message: errorMessage });
     } finally {
       setIsSaving(false);
     }
@@ -319,8 +338,13 @@ export default function ClientProfile() {
                   </div>
                   
                   <div className="space-y-1">
-                    <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#ff0400]/10 text-[#ff0400] text-[9px] font-black uppercase tracking-widest border border-[#ff0400]/20 mb-1">
-                      Socio Activo
+                    <div className={cn(
+                      "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border mb-1",
+                      user.membership_info?.status === 'EXPIRED' 
+                        ? "bg-red-500/10 text-red-500 border-red-500/20" 
+                        : "bg-[#ff0400]/10 text-[#ff0400] border-[#ff0400]/20"
+                    )}>
+                      {user.membership_info?.status === 'EXPIRED' ? 'Membresía Vencida' : 'Socio Activo'}
                     </div>
                     <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-none">{fullName || 'Guerrero'}</h3>
                     <p className="text-sm text-zinc-400 font-medium">{formData.email}</p>
@@ -452,11 +476,11 @@ export default function ClientProfile() {
                   {/* Goal Type Selection */}
                   <div className="space-y-2 md:col-span-2">
                     <Label className="text-gray-300">Objetivo Fitness</Label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, goal_type: 'LOSE' }))}
-                        className={`py-3 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                        className={`py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
                           formData.goal_type === 'LOSE'
                             ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
                             : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'
@@ -467,13 +491,24 @@ export default function ClientProfile() {
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, goal_type: 'GAIN' }))}
-                        className={`py-3 rounded-2xl border-2 text-sm font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                        className={`py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
                           formData.goal_type === 'GAIN'
                             ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
                             : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'
                         }`}
                       >
                         Ganar Masa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, goal_type: 'MAINTAIN' }))}
+                        className={`py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-500 shadow-lg ${
+                          formData.goal_type === 'MAINTAIN'
+                            ? 'bg-[#ff0400]/10 border-[#ff0400] text-white shadow-red-600/10'
+                            : 'bg-[#1a1a1a] border-[#262626] text-zinc-500 hover:border-zinc-700 hover:text-zinc-400'
+                        }`}
+                      >
+                        Mantener Peso
                       </button>
                     </div>
                   </div>
@@ -538,9 +573,6 @@ export default function ClientProfile() {
             <DialogTitle className="text-white text-center text-xl font-bold uppercase tracking-wider">
               Tu Código QR de Acceso
             </DialogTitle>
-            <DialogClose className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-2 text-gray-400 hover:bg-[#404040] hover:text-white transition-all">
-              <X className="h-6 w-6" />
-            </DialogClose>
           </DialogHeader>
           
           <div className="flex flex-col items-center gap-8 p-10 bg-[#191919]">

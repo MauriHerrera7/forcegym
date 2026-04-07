@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreditCard, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 interface MembershipStatusProps {
   membership: {
@@ -44,12 +46,12 @@ export function MembershipStatus({ membership, alert, loading }: MembershipStatu
     );
   }
 
-  const isExpired = membership.status !== 'ACTIVE' || (membership.days_remaining !== null && membership.days_remaining <= 0);
+  const isExpired = membership.status === 'EXPIRED' || (membership.days_remaining !== null && membership.days_remaining <= 0);
 
   return (
     <Card className={cn(
       "bg-[#191919] border-[#404040]",
-      alert && "border-yellow-500/50"
+      (alert || isExpired) && "border-yellow-500/50"
     )}>
       <CardHeader className="pb-2">
         <CardTitle className="text-white font-normal flex items-center justify-between">
@@ -58,10 +60,10 @@ export function MembershipStatus({ membership, alert, loading }: MembershipStatu
             Membresía
           </div>
           <span className={cn(
-            "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase",
-            membership.status === 'ACTIVE' ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+            "text-[11px] px-2.5 py-1 rounded-full font-medium uppercase tracking-wider",
+            isExpired ? "bg-red-500/10 text-red-500" : membership.status === 'ACTIVE' ? "bg-green-500/10 text-green-500" : "bg-yellow-500/10 text-yellow-500"
           )}>
-            {membership.status}
+            {isExpired ? 'Vencida' : membership.status}
           </span>
         </CardTitle>
       </CardHeader>
@@ -76,13 +78,27 @@ export function MembershipStatus({ membership, alert, loading }: MembershipStatu
             <span className="text-xs text-gray-500 font-medium">Días restantes</span>
             <span className={cn(
               "text-lg font-bold",
-              alert ? "text-yellow-500" : "text-white"
+              isExpired ? "text-red-500" : alert ? "text-yellow-500" : "text-white"
             )}>
-              {membership.days_remaining}
+              {isExpired ? 'Membresía vencida' : membership.days_remaining}
             </span>
           </div>
 
-          {alert && (
+          {isExpired && (
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center gap-2 p-2 rounded bg-red-500/10 border border-red-500/20">
+                <AlertCircle className="h-4 w-4 text-red-500" />
+                <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Rutina vencida, lista para renovar</span>
+              </div>
+              <Link href="/client/memberships?openPlans=true">
+                <Button className="w-full h-9 bg-red-600 hover:bg-red-700 text-white font-black italic uppercase tracking-tighter text-xs">
+                  Renovar Membresía
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {!isExpired && alert && (
             <div className="flex items-center gap-2 p-2 rounded bg-yellow-500/10 border border-yellow-500/20">
               <AlertCircle className="h-4 w-4 text-yellow-500" />
               <span className="text-[10px] text-yellow-500">Tu membresía está por vencer</span>

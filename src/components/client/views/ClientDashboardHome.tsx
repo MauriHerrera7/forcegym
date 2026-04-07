@@ -44,9 +44,27 @@ export default function ClientDashboardHome() {
     );
   }
 
-  const weightTrend = data?.weight_progress && data.weight_progress.length > 1
-    ? (data.weight_progress[data.weight_progress.length - 1].weight - data.weight_progress[data.weight_progress.length - 2].weight).toFixed(1)
-    : '0';
+  const weightTrend = React.useMemo(() => {
+    if (!data?.weight_progress || data.weight_progress.length < 2) return '0';
+    
+    const sorted = [...data.weight_progress].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const latest = sorted[sorted.length - 1];
+    
+    const latestDate = new Date(latest.date);
+    const firstOfCurrentMonth = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
+    
+    const previousMonthRecord = sorted
+      .filter(log => new Date(log.date) < firstOfCurrentMonth)
+      .pop();
+      
+    if (!previousMonthRecord) {
+      // Fallback: If it's the first month, compare against first log of month
+      const firstOfMonth = sorted.find(log => new Date(log.date) >= firstOfCurrentMonth);
+      return (latest.weight - (firstOfMonth?.weight || latest.weight)).toFixed(1);
+    }
+    
+    return (latest.weight - previousMonthRecord.weight).toFixed(1);
+  }, [data?.weight_progress]);
 
   const hasWeightThisMonth = data?.weight_progress?.some(log => {
     const logDate = new Date(log.date);

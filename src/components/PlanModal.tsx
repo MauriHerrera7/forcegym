@@ -172,6 +172,9 @@ export default function PlanModal({ isOpen, onClose }: PlanModalProps) {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {plans.map((plan) => {
                 const style = planStyles[plan.name as keyof typeof planStyles] || defaultPlanStyle
+                const isExpired = activeMembership && (activeMembership.status === 'EXPIRED' || new Date(activeMembership.end_date) < new Date());
+                const isSamePlan = activeMembership?.plan?.id === plan.id;
+
                 return (
                   <div 
                     key={plan.id}
@@ -210,23 +213,23 @@ export default function PlanModal({ isOpen, onClose }: PlanModalProps) {
 
                     <Button
                       onClick={() => handlePurchase(plan.id)}
-                      disabled={!!purchasing || activeMembership?.plan?.id === plan.id}
-                      className={`relative z-10 w-full py-6 md:py-8 rounded-2xl font-black uppercase tracking-widest transition-all duration-500 overflow-hidden group/btn 
-                        ${purchasing === plan.id || activeMembership?.plan?.id === plan.id
+                      disabled={!!purchasing || (isSamePlan && !isExpired)}
+                      className={`relative z-10 w-full py-6 md:py-7 rounded-2xl font-black uppercase tracking-tight transition-all duration-500 overflow-hidden group/btn 
+                        ${purchasing === plan.id || (isSamePlan && !isExpired)
                           ? 'bg-zinc-800 text-zinc-500' 
                           : 'bg-white text-black hover:text-white scale-100 active:scale-95 shadow-2xl'
                         }`}
                     >
-                      <span className="relative z-10 flex items-center justify-center gap-2">
+                      <span className="relative z-10 flex items-center justify-center gap-2 text-[10px] md:text-xs">
                         {purchasing === plan.id ? (
-                          <Loader2 className="h-7 w-7 animate-spin" />
-                        ) : activeMembership?.plan?.id === plan.id ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (isSamePlan && !isExpired) ? (
                           'Ya obtenido'
                         ) : (
-                          'Comenzar Ahora'
+                          'Obtener membresía'
                         )}
                       </span>
-                      {!(activeMembership?.plan?.id === plan.id) && (
+                      {(!isSamePlan || isExpired) && (
                         <div className="absolute inset-0 bg-[#ff0400] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
                       )}
                     </Button>

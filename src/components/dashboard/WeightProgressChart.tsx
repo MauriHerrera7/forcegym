@@ -119,35 +119,28 @@ export function WeightProgressChart({ data, goalType, onLogWeight, loading }: We
 
   // Calculate monthly difference
   const getMonthlyDifference = () => {
-    if (!data || data.length < 1) return null;
+    if (!data || data.length < 2) return null;
     
-    const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Sort all available data points
+    const sorted = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const latest = sorted[sorted.length - 1];
     
-    const currentMonthLogs = data
-      .filter(log => new Date(log.date) >= firstDayOfMonth)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Find the first day of the current month (relative to latest reading)
+    const latestDate = new Date(latest.date);
+    const firstOfCurrentMonth = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1);
+    
+    // Find the last record from any PREVIOUS month
+    const previousMonthRecord = sorted
+      .filter(log => new Date(log.date) < firstOfCurrentMonth)
+      .pop();
       
-    if (currentMonthLogs.length < 1) return null;
-    
-    // Difference between latest log and first log of the month
-    const latest = currentMonthLogs[currentMonthLogs.length - 1].weight;
-    const initial = currentMonthLogs[0].weight;
-    
-    // If only one log this month, compare with the last log of previous month if it exists
-    if (currentMonthLogs.length === 1) {
-      const prevMonthLogs = data
-        .filter(log => new Date(log.date) < firstDayOfMonth)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        
-      if (prevMonthLogs.length > 0) {
-        const lastPrev = prevMonthLogs[prevMonthLogs.length - 1].weight;
-        return latest - lastPrev;
-      }
-      return 0; // No historical data to compare
+    if (!previousMonthRecord) {
+      // Fallback: If it's the very first month with data, compare against first log of month
+      const firstOfMonth = sorted.find(log => new Date(log.date) >= firstOfCurrentMonth);
+      return firstOfMonth ? latest.weight - firstOfMonth.weight : 0;
     }
     
-    return latest - initial;
+    return latest.weight - previousMonthRecord.weight;
   };
 
   const monthlyDiff = getMonthlyDifference();

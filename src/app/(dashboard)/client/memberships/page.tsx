@@ -1,18 +1,20 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useMembership } from '@/hooks/useMembership'
 import { usePayments } from '@/hooks/usePayments'
-import { Loader2, Calendar, CreditCard, CheckCircle2, AlertCircle, Clock, ShoppingCart, Trash2, ExternalLink } from 'lucide-react'
+import { Loader2, Calendar, CreditCard, CheckCircle2, AlertCircle, Clock, ShoppingCart, Trash2, ExternalLink, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import PlanModal from '@/components/PlanModal'
 import { toast } from 'sonner'
 import { useConfirm } from '@/providers/ConfirmDialogProvider'
+import { useSearchParams } from 'next/navigation'
+import { fetchApi } from '@/lib/api'
 
 export default function ClientMembershipsPage() {
   const { confirm } = useConfirm()
@@ -20,6 +22,14 @@ export default function ClientMembershipsPage() {
   const { payments, loading: paymentsLoading, deletePayment, retryPayment } = usePayments()
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false)
   const [retryingId, setRetryingId] = useState<string | null>(null)
+  const [isRenewing, setIsRenewing] = useState(false)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('openPlans') === 'true') {
+      setIsPlanModalOpen(true)
+    }
+  }, [searchParams])
 
   const isLoading = membershipLoading || paymentsLoading
 
@@ -51,19 +61,42 @@ export default function ClientMembershipsPage() {
     });
   }
 
-  const getStatusBadge = (status: string) => {
+  const handleDirectPurchase = async (planId: string) => {
+    setIsRenewing(true)
+    try {
+      const response = await fetchApi('/payments/create_with_membership/', {
+        method: 'POST',
+        body: JSON.stringify({ plan_id: planId }),
+      })
+      
+      if (response && response.init_point) {
+        window.location.href = response.init_point
+      }
+    } catch (error: any) {
+      console.error('Error initiating purchase:', error)
+      toast.error(error.message || 'Error al procesar el pago.')
+    } finally {
+      setIsRenewing(false)
+    }
+  }
+
+  const isExpired = !!(activeMembership && (activeMembership.status === 'EXPIRED' || new Date(activeMembership.end_date) < new Date()));
+
+  const getStatusBadge = (status: string, forceExpired?: boolean) => {
+    if (forceExpired || status === 'EXPIRED') {
+      return <Badge className="bg-red-500/20 text-red-500 border-red-500/50 uppercase italic font-black text-[10px] tracking-widest px-3 py-1">Vencida</Badge>
+    }
     switch (status) {
       case 'ACTIVE':
       case 'PAID':
       case 'APPROVED':
-        return <Badge className="bg-green-500/20 text-green-500 border-green-500/50">Confirmado</Badge>
+        return <Badge className="bg-green-500/20 text-green-500 border-green-500/50 uppercase italic font-black text-[10px] tracking-widest px-3 py-1">Confirmado</Badge>
       case 'PENDING':
         return <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/50 uppercase italic font-black text-[10px] tracking-widest px-3 py-1">Pendiente</Badge>
-      case 'EXPIRED':
       case 'FAILED':
       case 'REJECTED':
       case 'CANCELLED':
-        return <Badge className="bg-red-500/20 text-red-500 border-red-500/50">Rechazado</Badge>
+        return <Badge className="bg-red-500/20 text-red-500 border-red-500/50 uppercase italic font-black text-[10px] tracking-widest px-3 py-1">Rechazado</Badge>
       default:
         return <Badge className="bg-zinc-500/20 text-zinc-500 border-zinc-500/50">{status}</Badge>
     }
@@ -86,7 +119,7 @@ export default function ClientMembershipsPage() {
             Tu <span className="text-apple-red">Membresía.</span>
           </h1>
           <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs italic">
-            Control de acceso y evolución técnica
+            Control de acceso e evolución técnica
           </p>
         </div>
         
@@ -100,14 +133,13 @@ export default function ClientMembershipsPage() {
       </div>
 
       {activeMembership ? (
-        <Card className="bg-apple-black border-[#222] overflow-hidden group hover:border-apple-red/50 transition-all duration-500 shadow-2xl">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-            <CheckCircle2 className="w-32 h-32 text-apple-red" />
-          </div>
+        <Card className={`bg-apple-black border-[#222] overflow-hidden group hover:border-apple-red/50 transition-all duration-500 shadow-2xl ${isExpired ? 'border-red-500/30' : ''}`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-zinc-500 text-xs font-black uppercase tracking-[0.3em]">Membresía Activa</CardTitle>
-              {getStatusBadge(activeMembership.status)}
+              <CardTitle className={`text-xs font-black uppercase tracking-[0.3em] ${isExpired ? 'text-apple-red' : 'text-zinc-500'}`}>
+                {isExpired ? 'Membresía Vencida' : 'Membresía Activa'}
+              </CardTitle>
+              {getStatusBadge(activeMembership.status, isExpired)}
             </div>
           </CardHeader>
           <CardContent className="space-y-8">
@@ -117,6 +149,19 @@ export default function ClientMembershipsPage() {
                   {activeMembership?.plan?.name}
                 </h3>
                 <p className="text-zinc-400 font-medium">{activeMembership?.plan?.description}</p>
+                
+                {isExpired && (
+                  <div className="pt-4">
+                    <Button 
+                      onClick={() => handleDirectPurchase(activeMembership?.plan?.id || '')}
+                      disabled={isRenewing}
+                      className="bg-[#ff0400] hover:bg-red-600 text-white font-black italic uppercase tracking-tight px-8 py-6 h-auto shadow-xl shadow-red-600/20 transition-all"
+                    >
+                      {isRenewing ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <RefreshCw className="h-5 w-5 mr-2" />}
+                      Renovar Nuevamente
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="bg-[#111] p-6 rounded-2xl border border-zinc-800/50 transition-colors group-hover:border-apple-red/30">
                 <div className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">Precio Mensual</div>
@@ -145,18 +190,6 @@ export default function ClientMembershipsPage() {
                   <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Vence el</p>
                   <p className="text-sm font-bold text-white uppercase italic">
                     {format(new Date(activeMembership.end_date), "d MMM, yyyy", { locale: es })}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-zinc-900/40 p-5 rounded-xl border border-white/5">
-                <div className="p-3 bg-apple-red/10 rounded-lg">
-                  <CreditCard className="h-6 w-6 text-apple-red" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Auto Renovación</p>
-                  <p className="text-sm font-bold text-white uppercase italic">
-                    {activeMembership.auto_renew ? 'Activada' : 'Desactivada'}
                   </p>
                 </div>
               </div>

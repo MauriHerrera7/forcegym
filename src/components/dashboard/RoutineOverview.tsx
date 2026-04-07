@@ -50,7 +50,7 @@ export function RoutineOverview({ routine, loading }: RoutineOverviewProps) {
               <Dumbbell className="h-5 w-5 text-red-500" />
               Mis Rutinas
             </div>
-            <span className="text-xs bg-red-500/10 text-red-500 px-2 py-1 rounded">Personal</span>
+            <span className="text-[11px] px-2.5 py-1 rounded-full bg-red-500/10 text-red-500 font-medium uppercase tracking-wider">Personal</span>
           </CardTitle>
         </CardHeader>
         <CardContent>

@@ -50,8 +50,14 @@ const Navbar: React.FC = () => {
 
   const handleDashboardNav = (subView: string) => {
     const role = user?.role?.toLowerCase() === 'admin' ? 'admin' : 'client';
-    // Use window.location for hard navigation to trigger provider re-init or router.push
-    router.push(`/${role}?v=${subView}`);
+    
+    if (subView === 'profile') {
+      router.push(`/${role}/profile`);
+    } else if (subView === 'memberships') {
+      router.push(`/${role}/memberships`);
+    } else {
+      router.push(`/${role}`);
+    }
     setIsMenuOpen(false);
   };
 
@@ -150,20 +156,22 @@ const Navbar: React.FC = () => {
                       </div>
 
                       <MenuButton 
-                        onClick={() => handleDashboardNav('dashboard')} 
-                        icon={<LayoutDashboard size={18} />} 
-                        label="Dashboard" 
-                      />
-                      <MenuButton 
                         onClick={() => handleDashboardNav('profile')} 
                         icon={<User size={18} />} 
                         label="Mi Perfil" 
                       />
                       <MenuButton 
-                        onClick={() => handleDashboardNav('memberships')} 
-                        icon={<CreditCard size={18} />} 
-                        label="Membresía" 
+                        onClick={() => handleDashboardNav('dashboard')} 
+                        icon={<LayoutDashboard size={18} />} 
+                        label="Dashboard" 
                       />
+                      {user?.role?.toLowerCase() !== 'admin' && (
+                        <MenuButton 
+                          onClick={() => handleDashboardNav('memberships')} 
+                          icon={<CreditCard size={18} />} 
+                          label="Membresía" 
+                        />
+                      )}
                       
                       <div className="my-2 border-t border-white/5 pt-2">
                         <button

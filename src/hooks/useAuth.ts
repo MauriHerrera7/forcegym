@@ -37,6 +37,12 @@ export interface User {
   bmi?: string | number;
   is_active: boolean;
   profile?: UserProfile;
+  membership_info?: {
+    plan_name: string;
+    status: string;
+    end_date: string;
+    days_remaining: number | null;
+  } | null;
   created_at?: string;
   updated_at?: string;
 }

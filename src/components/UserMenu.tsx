@@ -121,16 +121,16 @@ export default function UserMenu({ userImage: propImage, userName: propName }: U
           </div>
 
           <button
-            onClick={handleDashboardClick}
-            className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 outline-none"
-          >
-            Dashboard
-          </button>
-          <button
             onClick={handleProfileClick}
             className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 outline-none"
           >
             Mi Perfil
+          </button>
+          <button
+            onClick={handleDashboardClick}
+            className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 outline-none"
+          >
+            Dashboard
           </button>
           <button
             onClick={() => { handleLogout(); setIsOpen(false); }}
