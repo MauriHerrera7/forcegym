@@ -184,6 +184,8 @@ export default function ClientDashboardHome() {
             <RoutineOverview routine={data?.weekly_routine || null} loading={loading} />
           </div>
         </div>
+      </div>
     </div>
   );
 }
+
