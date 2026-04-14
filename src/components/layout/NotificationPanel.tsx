@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, AlertTriangle, CheckCircle, CreditCard, UserCircle, X, ChevronsRight } from 'lucide-react';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { useMembership } from '@/hooks/useMembership';
+import { usePlanModal } from '@/providers/PlanModalProvider';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -15,11 +16,13 @@ interface Notification {
   message: string;
   link?: string;
   linkLabel?: string;
+  onClick?: () => void;
 }
 
 export function NotificationPanel() {
   const { user } = useAuthContext();
   const { activeMembership } = useMembership();
+  const { openPlanModal } = usePlanModal();
   const [isOpen, setIsOpen] = useState(false);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [mounted, setMounted] = useState(false);
@@ -73,7 +76,7 @@ export function NotificationPanel() {
       icon: <AlertTriangle className="h-5 w-5 text-red-400" />,
       title: 'Sin membresía activa',
       message: 'No tienes una membresía activa. Adquiere un plan para acceder a todos los beneficios.',
-      link: '/#ofertas',
+      onClick: openPlanModal,
       linkLabel: 'Ver planes',
     });
   } else {
@@ -91,7 +94,7 @@ export function NotificationPanel() {
         icon: <AlertTriangle className="h-5 w-5 text-red-400" />,
         title: 'Membresía vencida',
         message: 'Tu membresía ha vencido. Renueva tu plan para seguir entrenando.',
-        link: '/#ofertas',
+        onClick: openPlanModal,
         linkLabel: 'Renovar ahora',
       });
     } else if (daysLeft !== null && daysLeft <= 7) {
@@ -101,7 +104,7 @@ export function NotificationPanel() {
         icon: <AlertTriangle className="h-5 w-5 text-yellow-400" />,
         title: 'Membresía por vencer',
         message: `Tu membresía vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}. ¡Renueva para no perder el acceso!`,
-        link: '/#ofertas',
+        onClick: openPlanModal,
         linkLabel: 'Renovar plan',
       });
     } else if (activeMembership.status === 'ACTIVE') {
@@ -218,6 +221,18 @@ export function NotificationPanel() {
                           {notif.linkLabel}
                           <ChevronsRight className="h-3 w-3" />
                         </Link>
+                      )}
+                      {notif.onClick && (
+                        <button
+                          onClick={() => {
+                            notif.onClick?.();
+                            setIsOpen(false);
+                          }}
+                          className="inline-flex items-center gap-1 mt-1.5 text-xs text-[#ff0400] hover:underline font-semibold"
+                        >
+                          {notif.linkLabel}
+                          <ChevronsRight className="h-3 w-3" />
+                        </button>
                       )}
                     </div>
                     {/* Dismiss button */}

@@ -7,6 +7,7 @@ import { AppNavigationProvider, AppView } from "@/providers/AppNavigationProvide
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import { Toaster } from 'sonner';
 import { ConfirmDialogProvider } from "@/providers/ConfirmDialogProvider";
+import { PlanModalProvider } from "@/providers/PlanModalProvider";
 
 const montserrat = Montserrat({
   variable: "--font-body",
@@ -51,9 +52,11 @@ export default async function RootLayout({
             initialDashboardView={initialDashboardView as any}
           >
             <ConfirmDialogProvider>
-              <ConditionalNavbar />
-              <Toaster richColors position="top-center" />
-              {children}
+              <PlanModalProvider>
+                <ConditionalNavbar />
+                <Toaster richColors position="top-center" />
+                {children}
+              </PlanModalProvider>
             </ConfirmDialogProvider>
           </AppNavigationProvider>
         </AuthProvider>

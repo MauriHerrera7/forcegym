@@ -13,9 +13,10 @@ interface MembershipStatusProps {
   } | null;
   alert: boolean;
   loading?: boolean;
+  onAcquirePlan?: () => void;
 }
 
-export function MembershipStatus({ membership, alert, loading }: MembershipStatusProps) {
+export function MembershipStatus({ membership, alert, loading, onAcquirePlan }: MembershipStatusProps) {
   if (loading) {
     return (
       <Card className="bg-[#191919] border-[#404040] animate-pulse">
@@ -38,7 +39,10 @@ export function MembershipStatus({ membership, alert, loading }: MembershipStatu
             <AlertCircle className="h-4 w-4" />
             <span>No tienes una membresía activa.</span>
           </div>
-          <button className="mt-4 w-full py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors">
+          <button 
+            onClick={onAcquirePlan}
+            className="mt-4 w-full py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors"
+          >
             Adquirir Plan
           </button>
         </CardContent>
@@ -90,11 +94,12 @@ export function MembershipStatus({ membership, alert, loading }: MembershipStatu
                 <AlertCircle className="h-4 w-4 text-red-500" />
                 <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Rutina vencida, lista para renovar</span>
               </div>
-              <Link href="/client/memberships?openPlans=true">
-                <Button className="w-full h-9 bg-red-600 hover:bg-red-700 text-white font-black italic uppercase tracking-tighter text-xs">
-                  Renovar Membresía
-                </Button>
-              </Link>
+              <Button 
+                onClick={onAcquirePlan}
+                className="w-full h-9 bg-red-600 hover:bg-red-700 text-white font-black italic uppercase tracking-tighter text-xs"
+              >
+                Renovar Membresía
+              </Button>
             </div>
           )}
 

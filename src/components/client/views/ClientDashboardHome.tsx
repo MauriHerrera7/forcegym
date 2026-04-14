@@ -11,9 +11,11 @@ import { RoutineOverview } from '@/components/dashboard/RoutineOverview';
 import { MembershipStatus } from '@/components/dashboard/MembershipStatus';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuthContext } from '@/providers/AuthProvider';
+import { usePlanModal } from '@/providers/PlanModalProvider';
 
 export default function ClientDashboardHome() {
   const { user, fetchUser } = useAuthContext();
+  const { openPlanModal } = usePlanModal();
   const { data, loading, error, toggleAttendance, logWeight } = useClientDashboard();
   const [isAlertDismissed, setIsAlertDismissed] = React.useState(false);
 
@@ -172,12 +174,16 @@ export default function ClientDashboardHome() {
           />
         </div>
         <div className="space-y-6 w-full overflow-hidden">
-          <MembershipStatus membership={data?.membership || null} alert={data?.membership_status_alert || false} loading={loading} />
+          <MembershipStatus 
+            membership={data?.membership || null} 
+            alert={data?.membership_status_alert || false} 
+            loading={loading}
+            onAcquirePlan={openPlanModal}
+          />
           <div className="animate-in slide-in-from-right duration-700 delay-200 w-full overflow-hidden">
             <RoutineOverview routine={data?.weekly_routine || null} loading={loading} />
           </div>
         </div>
-      </div>
     </div>
   );
 }
