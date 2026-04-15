@@ -226,4 +226,4 @@ const MenuButton = ({ label, icon, onClick }: MenuButtonProps) => (
   </button>
 );
 
-export default Navbar
+export default Navbar

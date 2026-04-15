@@ -12,6 +12,7 @@ import AppleTestimonials from '@/components/landing/Testimonials'
 import ActionCTA from '@/components/landing/ActionCTA'
 import AppleFooter from '@/components/landing/AppleFooter'
 import TrainingTech from '@/components/landing/TrainingTech'
+import WhatsAppButton from '@/components/landing/WhatsAppButton'
 
 // Auth Pages (Components)
 import RegisterPage from './auth/register/page'
@@ -55,6 +56,7 @@ const LandingPage: React.FC = () => {
       <AppleTestimonials />
       <ActionCTA />
       <AppleFooter />
+      <WhatsAppButton />
 
       <style jsx global>{`
         body { background-color: #0B0B0B; }
