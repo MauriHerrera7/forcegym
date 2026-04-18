@@ -104,6 +104,48 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
     }
   };
 
+  const handleGuestLogin = async (role: 'client' | 'admin') => {
+    setIsLoading(true);
+    setErrors({});
+    
+    // Predetermined guest credentials
+    const credentials = {
+      client: {
+        email: 'invitado_cliente@forcegym.com',
+        password: 'GuestPassword123!'
+      },
+      admin: {
+        email: 'invitado_admin@forcegym.com',
+        password: 'AdminPassword123!'
+      }
+    };
+
+    const { email: guestEmail, password: guestPassword } = credentials[role];
+    
+    // Auto-fill form for visual feedback (optional but nice)
+    setEmail(guestEmail);
+    setPassword(guestPassword);
+
+    try {
+      await login({ email: guestEmail, password: guestPassword });
+      
+      const userRes = await fetchApi("/users/me/");
+      
+      if (userRes?.role?.toUpperCase() === 'ADMIN') {
+        navigateTo('admin');
+      } else {
+        navigateTo('client');
+      }
+    } catch (error: any) {
+      console.error('Guest login error:', error);
+      setErrors({
+        password: 'Error al iniciar como invitado. Intenta más tarde.'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={`w-full max-w-sm mx-auto px-6 ${className}`}>
       <button
@@ -226,6 +268,33 @@ export default function LoginForm({ className = '' }: LoginFormProps) {
               'Iniciar Sesión'
             )}
           </button>
+
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-zinc-800"></div>
+            <span className="flex-shrink mx-4 text-zinc-500 text-xs font-semibold uppercase tracking-widest">
+              O ingresar como
+            </span>
+            <div className="flex-grow border-t border-zinc-800"></div>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => handleGuestLogin('client')}
+              disabled={isLoading}
+              className="w-full bg-[#1c1c1e] text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-600 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50"
+            >
+              Iniciar como invitado
+            </button>
+            <button
+              type="button"
+              onClick={() => handleGuestLogin('admin')}
+              disabled={isLoading}
+              className="w-full bg-[#1c1c1e] text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-600 py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50"
+            >
+              Iniciar como admin invitado
+            </button>
+          </div>
 
           <p className="text-center text-zinc-500 font-medium">
             ¿No tienes cuenta?{' '}
