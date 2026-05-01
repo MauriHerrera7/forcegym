@@ -75,43 +75,6 @@ export default function TrainingPage() {
         </div>
         {/* Right Column: Interactive Selector */}
         <div className="lg:col-span-8 space-y-4">
-          {/* Interactive Tooltip Replacement for Desktop/Sidebar Context */}
-          <div className={cn(
-            "p-4 rounded-2xl border transition-all duration-500 flex items-center justify-between shadow-2xl relative overflow-hidden",
-            selectedMuscleName 
-              ? "bg-[#ff0400]/20 border-[#ff0400]/40 translate-y-0 opacity-100" 
-              : "bg-[#ff0400]/10 border-[#ff0400]/20 translate-y-0 opacity-100"
-          )}>
-            {/* Subtle background glow when idle */}
-            {!selectedMuscleName && (
-              <div className="absolute inset-0 bg-gradient-to-r from-[#ff0400]/10 to-transparent pointer-events-none animate-pulse" />
-            )}
-            <div className="flex items-center gap-4">
-              <div className={cn(
-                "w-3 h-3 rounded-full animate-pulse shadow-[0_0_8px]",
-                selectedMuscleName ? "bg-apple-red shadow-apple-red/50" : "bg-zinc-700 shadow-transparent"
-              )} />
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-400 font-black mb-1">Explorando ahora</p>
-                <p className="text-xl font-black text-white uppercase italic tracking-tight">
-                  {selectedMuscleName || 'Mueve el cursor sobre el modelo'}
-                </p>
-              </div>
-            </div>
-            {selectedMuscleName && (
-              <Button 
-                onClick={() => {
-                  // Find ID from name to navigate
-                  const group = MUSCLE_GROUPS.find(g => g.name === selectedMuscleName);
-                  if (group) handleMuscleClick(group.id);
-                }}
-                className="bg-apple-red hover:bg-[#ff1a1a] text-white rounded-full px-6 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-apple-red/20"
-              >
-                Ver Ejercicios
-              </Button>
-            )}
-          </div>
-
           <Card className="bg-[#111111] border-[#252525] border-dashed rounded-3xl overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-apple-red/[0.02] to-transparent pointer-events-none" />
             <div className="relative p-2 md:p-4">
